@@ -1,18 +1,28 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function Booking() {
   const [step, setStep] = useState(1);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   
-  // Mock available times based on a date selection
   const availableTimes = ['09:00 AM', '10:30 AM', '01:00 PM', '03:00 PM'];
+  const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
 
-  const handleConfirm = () => {
-    // Phase 4: Connect to FastAPI endpoint here
-    console.log(`Booking confirmed for ${date} at ${time}. Confirmation email triggered.`);
-    alert(`Success! Your appointment for ${date} at ${time} is pending confirmation.`);
-    setStep(1); setDate(''); setTime('');
+  const handleConfirm = async () => {
+    try {
+      // FastAPI expects these as query parameters based on our setup
+      await axios.post(`${API_URL}/api/bookings`, null, {
+        params: { name, email, date, time }
+      });
+      alert(`Success! Your appointment for ${date} at ${time} is pending confirmation.`);
+      setStep(1); setDate(''); setTime(''); setName(''); setEmail('');
+    } catch (error) {
+      console.error("Booking error:", error);
+      alert("There was an issue saving your booking. Please try again.");
+    }
   };
 
   return (
@@ -54,12 +64,13 @@ export default function Booking() {
         )}
 
         {step === 3 && (
-          <div className="flex flex-col gap-4 text-center">
-            <p className="text-lg">You selected:</p>
-            <p className="text-xl font-bold text-blue-800">{date} at {time}</p>
+          <div className="flex flex-col gap-4">
+            <p className="text-center text-lg">You selected: <br/><span className="text-xl font-bold text-blue-800">{date} at {time}</span></p>
+            <input type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} className="border p-3 rounded outline-none focus:ring-2 focus:ring-blue-500" required />
+            <input type="email" placeholder="Your Email" value={email} onChange={e => setEmail(e.target.value)} className="border p-3 rounded outline-none focus:ring-2 focus:ring-blue-500" required />
             <div className="flex gap-3 mt-4">
               <button onClick={() => setStep(2)} className="flex-1 bg-gray-200 text-gray-800 py-3 rounded font-bold hover:bg-gray-300">Back</button>
-              <button onClick={handleConfirm} className="flex-1 bg-red-600 text-white py-3 rounded font-bold hover:bg-red-700">Confirm Booking</button>
+              <button onClick={handleConfirm} disabled={!name || !email} className="flex-1 bg-red-600 text-white py-3 rounded font-bold hover:bg-red-700 disabled:opacity-50">Confirm</button>
             </div>
           </div>
         )}
