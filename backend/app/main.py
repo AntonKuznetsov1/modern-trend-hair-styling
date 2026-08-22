@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from app.models.models import Booking, BlogPost, AvailableTime
 from app.services.email import send_system_email
+from app.core.database import get_db
 # Assume get_db is a dependency yielding a database session
 
 app = FastAPI()
