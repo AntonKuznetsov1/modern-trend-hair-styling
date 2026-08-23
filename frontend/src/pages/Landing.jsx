@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
-// COMPONENT: Solid architectural grid with refined transparency
+// COMPONENT: Solid, subtle architectural grid
 const BackgroundPattern = () => {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50/20">
-      {/* Solid Linear Grid */}
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-white">
+      {/* Crisp, subtle grid lines */}
       <div 
         className="absolute inset-0" 
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(148, 163, 184, 0.35) 1.5px, transparent 1.5px),
-            linear-gradient(to bottom, rgba(148, 163, 184, 0.35) 1.5px, transparent 1.5px)
+            linear-gradient(to right, rgba(148, 163, 184, 0.25) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.25) 1.5px, transparent 1.5px)
           `,
           backgroundSize: '56px 56px'
         }}
@@ -24,13 +24,13 @@ export default function Landing() {
   return (
     <div className="relative min-h-screen bg-white overflow-hidden font-sans text-slate-900">
       
-      {/* Styles for modern display font & strap animation */}
+      {/* Styles for Plus Jakarta Sans (ultra-clean Inter alternative) & animations */}
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800;900&display=swap');
           
           .font-modern-title {
-            font-family: 'Syne', sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
           }
 
           @keyframes slideDown {
@@ -47,7 +47,7 @@ export default function Landing() {
         `}
       </style>
 
-      {/* Background Component */}
+      {/* Background Grid Component */}
       <BackgroundPattern />
 
       {/* RIGHT SIDE: Animated Vertical Straps */}
@@ -60,12 +60,12 @@ export default function Landing() {
       <div className="absolute inset-0 flex flex-col justify-end items-start p-8 md:p-16 w-full md:w-3/4 lg:w-2/3 z-10">
         
         {/* Typography */}
-        <h1 className="font-modern-title text-6xl md:text-8xl font-extrabold mb-6 tracking-tight leading-[0.95] uppercase">
+        <h1 className="font-modern-title text-5xl sm:text-7xl md:text-8xl font-extrabold mb-6 tracking-tighter leading-[0.95] uppercase">
           Modern <span className="text-red-600">Trend</span> <br />
           <span className="text-blue-700">Hair Styling</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed max-w-lg font-medium bg-white/70 backdrop-blur-md p-4 rounded-2xl border border-white/90 shadow-sm">
+        <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed max-w-lg font-medium bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-100 shadow-sm">
           Your premier barbershop specializing in men's styling, precision beard trimming, and standard military cuts. Ladies' cuts also welcome. Open Monday through Saturday.
         </p>
         
@@ -80,7 +80,7 @@ export default function Landing() {
         </div>
 
         {/* Minimalist Contact Info */}
-        <div className="flex flex-col sm:flex-row gap-6 text-sm font-bold text-slate-600 bg-white/80 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-200/70 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-6 text-sm font-bold text-slate-600 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-red-600 transition-colors">
             <MapPin className="w-5 h-5 text-red-600"/> 
             144 Gibson Street, Fredericton, NB
