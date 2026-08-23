@@ -1,28 +1,30 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
-// COMPONENT: Crisp Architectural Grid & Ambient Light Glow
+// COMPONENT: Architectural Grid fading from Top-Left to Bottom-Right
 const BackgroundPattern = () => {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50/30">
-      {/* Defined Linear Grid with Higher Contrast */}
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50/20">
+      {/* Crisp Grid with CSS Mask fading from Top-Left to Bottom-Right */}
       <div 
-        className="absolute inset-0 opacity-85" 
+        className="absolute inset-0 opacity-95" 
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(148, 163, 184, 0.65) 1.5px, transparent 1.5px),
-            linear-gradient(to bottom, rgba(148, 163, 184, 0.65) 1.5px, transparent 1.5px)
+            linear-gradient(to right, rgba(148, 163, 184, 0.7) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.7) 1.5px, transparent 1.5px)
           `,
-          backgroundSize: '56px 56px'
+          backgroundSize: '56px 56px',
+          WebkitMaskImage: 'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.1) 85%)',
+          maskImage: 'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.1) 85%)'
         }}
       ></div>
 
-      {/* Ambient Color Glows for Depth */}
-      <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-10 left-1/2 w-[400px] h-[400px] bg-red-100/35 rounded-full blur-3xl"></div>
+      {/* Ambient Color Glows positioned along the top-left to bottom-right diagonal */}
+      <div className="absolute -top-32 -left-32 w-[550px] h-[550px] bg-blue-100/60 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-32 -right-32 w-[550px] h-[550px] bg-red-100/40 rounded-full blur-3xl"></div>
 
-      {/* Gentle Fade Overlay to keep content sharp and readable */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-white/90 via-white/40 to-transparent"></div>
+      {/* Gradient Overlay matching top-left to bottom-right direction */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/60 to-white/90"></div>
     </div>
   );
 };
