@@ -11,7 +11,7 @@ const BackgroundPattern = () => {
         style={{
           backgroundImage: `
             linear-gradient(to right, rgba(148, 163, 184, 0.7) 1.5px, transparent 1.5px),
-            linear-gradient(to bottom, rgba(148, 163, 184, 0.7) 1.5px, transparent 1.5px)
+            linear-gradient(to top, rgba(148, 163, 184, 0.7) 1.5px, transparent 1.5px)
           `,
           backgroundSize: '56px 56px',
           WebkitMaskImage: 'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.1) 85%)',
