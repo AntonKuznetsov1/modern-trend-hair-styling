@@ -27,7 +27,7 @@ export default function Landing() {
       {/* Styles for Plus Jakarta Sans (ultra-clean Inter alternative) & animations */}
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800;900&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
           
           .font-modern-title {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
