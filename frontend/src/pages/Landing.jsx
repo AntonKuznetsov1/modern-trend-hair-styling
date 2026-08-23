@@ -60,9 +60,9 @@ export default function Landing() {
       <div className="absolute inset-0 flex flex-col justify-end items-start p-8 md:p-16 w-full md:w-3/4 lg:w-2/3 z-10">
         
         {/* Typography */}
-        <h1 className="font-modern-title text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 tracking-tighter leading-[0.95] uppercase">
-          Modern <span className="text-red-400">Trend</span> <br />
-          <span className="text-blue-500">Hair Styling</span>
+        <h1 className="font-modern-title text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tighter leading-[0.95] uppercase">
+          Modern <span className="text-red-600">Trend</span> <br />
+          <span className="text-blue-700">Hair Styling</span>
         </h1>
         
         <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed max-w-lg font-medium bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-100 shadow-sm">
