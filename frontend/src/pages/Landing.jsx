@@ -1,28 +1,28 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
-// NEW COMPONENT: Architectural Grid & Ambient Light Glow
+// COMPONENT: Crisp Architectural Grid & Ambient Light Glow
 const BackgroundPattern = () => {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50/60">
-      {/* Fine Linear Grid */}
+    <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50/30">
+      {/* Defined Linear Grid with Higher Contrast */}
       <div 
-        className="absolute inset-0 opacity-60" 
+        className="absolute inset-0 opacity-85" 
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(203, 213, 225, 0.5) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(203, 213, 225, 0.5) 1px, transparent 1px)
+            linear-gradient(to right, rgba(148, 163, 184, 0.65) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.65) 1.5px, transparent 1.5px)
           `,
           backgroundSize: '56px 56px'
         }}
       ></div>
 
-      {/* Subtle Ambient Color Glows for Depth */}
-      <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-blue-100/60 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-10 left-1/2 w-[400px] h-[400px] bg-red-100/40 rounded-full blur-3xl"></div>
+      {/* Ambient Color Glows for Depth */}
+      <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-10 left-1/2 w-[400px] h-[400px] bg-red-100/35 rounded-full blur-3xl"></div>
 
-      {/* Soft Vignette Fade overlay */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-white via-white/70 to-transparent"></div>
+      {/* Gentle Fade Overlay to keep content sharp and readable */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/90 via-white/40 to-transparent"></div>
     </div>
   );
 };
@@ -73,7 +73,7 @@ export default function Landing() {
           <span className="text-blue-700">Hair Styling</span>
         </h1>
         
-        <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed max-w-lg font-medium bg-white/60 backdrop-blur-md p-4 rounded-2xl border border-white/80 shadow-sm">
+        <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed max-w-lg font-medium bg-white/70 backdrop-blur-md p-4 rounded-2xl border border-white/90 shadow-sm">
           Your premier barbershop specializing in men's styling, precision beard trimming, and standard military cuts. Ladies' cuts also welcome. Open Monday through Saturday.
         </p>
         
@@ -88,7 +88,7 @@ export default function Landing() {
         </div>
 
         {/* Minimalist Contact Info */}
-        <div className="flex flex-col sm:flex-row gap-6 text-sm font-bold text-slate-600 bg-white/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-200/60 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-6 text-sm font-bold text-slate-600 bg-white/80 backdrop-blur-md px-6 py-4 rounded-2xl border border-slate-200/70 shadow-sm">
           <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-red-600 transition-colors">
             <MapPin className="w-5 h-5 text-red-600"/> 
             144 Gibson Street, Fredericton, NB
