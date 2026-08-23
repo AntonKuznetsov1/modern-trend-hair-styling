@@ -1,30 +1,21 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
-// COMPONENT: Architectural Grid fading from Top-Left to Bottom-Right
+// COMPONENT: Solid architectural grid with refined transparency
 const BackgroundPattern = () => {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50/20">
-      {/* Crisp Grid with CSS Mask fading from Top-Left to Bottom-Right */}
+      {/* Solid Linear Grid */}
       <div 
-        className="absolute inset-0 opacity-95" 
+        className="absolute inset-0" 
         style={{
           backgroundImage: `
-            linear-gradient(to left, rgba(171, 184, 202, 0.51) 1.5px, rgba(148, 163, 184, 0.7) 1.5px),
-            linear-gradient(to bottom, rgba(171, 184, 202, 0.51) 1.5px, rgba(148, 163, 184, 0.7) 1.5px)
+            linear-gradient(to right, rgba(148, 163, 184, 0.35) 1.5px, transparent 1.5px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.35) 1.5px, transparent 1.5px)
           `,
-          backgroundSize: '56px 56px',
-          WebkitMaskImage: 'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.1) 85%)',
-          maskImage: 'linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.1) 85%)'
+          backgroundSize: '56px 56px'
         }}
       ></div>
-
-      {/* Ambient Color Glows positioned along the top-left to bottom-right diagonal */}
-      <div className="absolute -top-32 -left-32 w-[550px] h-[550px] bg-blue-100/60 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-32 -right-32 w-[550px] h-[550px] bg-red-100/40 rounded-full blur-3xl"></div>
-
-      {/* Gradient Overlay matching top-left to bottom-right direction */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/60 to-white/90"></div>
     </div>
   );
 };
@@ -33,13 +24,13 @@ export default function Landing() {
   return (
     <div className="relative min-h-screen bg-white overflow-hidden font-sans text-slate-900">
       
-      {/* Styles for fonts & strap animation */}
+      {/* Styles for modern display font & strap animation */}
       <style>
         {`
-          @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap');
           
-          .font-premium {
-            font-family: 'Playfair Display', serif;
+          .font-modern-title {
+            font-family: 'Syne', sans-serif;
           }
 
           @keyframes slideDown {
@@ -69,9 +60,8 @@ export default function Landing() {
       <div className="absolute inset-0 flex flex-col justify-end items-start p-8 md:p-16 w-full md:w-3/4 lg:w-2/3 z-10">
         
         {/* Typography */}
-        <h1 className="font-premium text-6xl md:text-8xl font-black mb-6 tracking-tight leading-[1]">
-          Modern <br />
-          <span className="text-red-600 italic">Trend</span> <br />
+        <h1 className="font-modern-title text-6xl md:text-8xl font-extrabold mb-6 tracking-tight leading-[0.95] uppercase">
+          Modern <span className="text-red-600">Trend</span> <br />
           <span className="text-blue-700">Hair Styling</span>
         </h1>
         
