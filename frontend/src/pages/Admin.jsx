@@ -1,62 +1,186 @@
 import { useState } from 'react';
-import { Calendar, FileText, Clock, Mail, XCircle } from 'lucide-react';
+import { Calendar, FileText, Clock, Mail, XCircle, LayoutDashboard, Send, ShieldAlert, CheckCircle } from 'lucide-react';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState('bookings');
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      {/* Sidebar Navigation */}
-      <aside className="w-64 bg-zinc-900 text-white flex flex-col">
-        <div className="p-6 text-xl font-bold border-b border-zinc-800">Shop Admin</div>
-        <nav className="flex flex-col p-4 gap-2">
-          <button onClick={() => setActiveTab('bookings')} className={`flex items-center gap-3 p-3 rounded ${activeTab === 'bookings' ? 'bg-blue-600' : 'hover:bg-zinc-800'}`}><Calendar size={20}/> Bookings</button>
-          <button onClick={() => setActiveTab('blog')} className={`flex items-center gap-3 p-3 rounded ${activeTab === 'blog' ? 'bg-blue-600' : 'hover:bg-zinc-800'}`}><FileText size={20}/> Blog Posts</button>
-          <button onClick={() => setActiveTab('schedule')} className={`flex items-center gap-3 p-3 rounded ${activeTab === 'schedule' ? 'bg-blue-600' : 'hover:bg-zinc-800'}`}><Clock size={20}/> Schedule</button>
-        </nav>
+    <div className="min-h-screen flex bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+          .font-modern-title { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+        `}
+      </style>
+
+      {/* Dark Modern Sidebar Navigation */}
+      <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6">
+        <div>
+          {/* Brand Logo Header */}
+          <div className="flex items-center gap-3 mb-10 pb-6 border-b border-slate-800">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-lg font-bold text-lg">
+              MT
+            </div>
+            <div>
+              <h2 className="font-modern-title font-bold text-slate-100 tracking-tight leading-tight">Modern Trend</h2>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Admin Console</p>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-2">
+            {[
+              { id: 'bookings', label: 'Bookings', icon: Calendar },
+              { id: 'blog', label: 'Blog Manager', icon: FileText },
+              { id: 'schedule', label: 'Availability', icon: Clock }
+            ].map(item => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button 
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)} 
+                  className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${
+                    isActive 
+                      ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/30' 
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  {item.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="pt-6 border-t border-slate-800 text-xs text-slate-500 font-medium">
+          System Operational • v2.4
+        </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-10">
+      {/* Main Content Dashboard */}
+      <main className="flex-1 p-8 md:p-12 overflow-y-auto bg-slate-950">
         
+        {/* Top Operational Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Active Bookings</p>
+              <p className="text-3xl font-bold font-modern-title mt-1 text-white">12</p>
+            </div>
+            <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl">
+              <Calendar className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Published Posts</p>
+              <p className="text-3xl font-bold font-modern-title mt-1 text-white">8</p>
+            </div>
+            <div className="p-3 bg-red-600/10 text-red-400 rounded-xl">
+              <FileText className="w-6 h-6" />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Shop Status</p>
+              <p className="text-3xl font-bold font-modern-title mt-1 text-emerald-400">Open</p>
+            </div>
+            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
+              <CheckCircle className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* TAB 1: BOOKINGS MANAGEMENT */}
         {activeTab === 'bookings' && (
-          <div>
-            <h2 className="text-3xl font-bold mb-6">Manage Bookings</h2>
-            <div className="bg-white rounded shadow-sm border p-4 flex justify-between items-center mb-4">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-modern-title text-3xl font-bold text-white">Manage Bookings</h2>
+              <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-full">
+                Realtime Feed
+              </span>
+            </div>
+
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
               <div>
-                <p className="font-bold text-lg">John Doe</p>
-                <p className="text-gray-600">Aug 25, 2026 - 10:30 AM</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-bold text-white">John Doe</span>
+                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">
+                    Confirmed
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-slate-400 mt-1">Aug 25, 2026 • 10:30 AM</p>
               </div>
-              <div className="flex gap-3">
-                <button className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-2 rounded hover:bg-blue-200"><Mail size={16}/> Email</button>
-                <button className="flex items-center gap-2 bg-red-100 text-red-700 px-3 py-2 rounded hover:bg-red-200"><XCircle size={16}/> Cancel</button>
+
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <button className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                  <Mail className="w-4 h-4 text-blue-400" /> Email Client
+                </button>
+                <button className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                  <XCircle className="w-4 h-4" /> Cancel
+                </button>
               </div>
             </div>
           </div>
         )}
 
+        {/* TAB 2: BLOG MANAGER */}
         {activeTab === 'blog' && (
-          <div>
-            <h2 className="text-3xl font-bold mb-6">Blog Manager</h2>
-            <form className="bg-white p-6 rounded shadow-sm border flex flex-col gap-4 max-w-2xl">
-              <input type="text" placeholder="Post Title" className="border p-2 rounded outline-none focus:border-blue-500" />
-              <textarea rows="5" placeholder="Post Content..." className="border p-2 rounded outline-none focus:border-blue-500"></textarea>
-              <button type="button" className="bg-zinc-900 text-white py-2 rounded font-bold w-32 hover:bg-zinc-800">Publish</button>
+          <div className="space-y-6 max-w-3xl">
+            <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Create New Article</h2>
+            
+            <form className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Master Beard Styling in 5 Steps" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
+                <textarea 
+                  rows="6" 
+                  placeholder="Write your editorial content here..." 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors resize-none"
+                ></textarea>
+              </div>
+
+              <button 
+                type="button" 
+                className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
+              >
+                <Send className="w-4 h-4" /> Publish Insight
+              </button>
             </form>
           </div>
         )}
 
+        {/* TAB 3: AVAILABILITY & SCHEDULE */}
         {activeTab === 'schedule' && (
-          <div>
-            <h2 className="text-3xl font-bold mb-6">Availability Settings</h2>
-            <div className="bg-white p-6 rounded shadow-sm border max-w-xl">
-              <p className="mb-4 text-gray-600">Block out dates or modify standard hours.</p>
-              <div className="flex gap-4 items-end mb-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-bold mb-1">Exception Date</label>
-                  <input type="date" className="border p-2 rounded w-full" />
+          <div className="space-y-6 max-w-2xl">
+            <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Availability Settings</h2>
+            
+            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+              <p className="text-slate-400 text-sm font-medium">Block specific dates for holidays or staff training.</p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 items-end">
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Exception Date</label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-blue-700 font-medium" 
+                  />
                 </div>
-                <button className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700">Block Date</button>
+                <button className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                  <ShieldAlert className="w-4 h-4" /> Block Date
+                </button>
               </div>
             </div>
           </div>
