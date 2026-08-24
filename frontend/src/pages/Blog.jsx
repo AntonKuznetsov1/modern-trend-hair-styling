@@ -66,7 +66,6 @@ export default function Blog() {
         `}
       </style>
 
-      {/* Decorative Top Accent Straps */}
       <div className="absolute top-0 right-8 md:right-24 h-64 w-32 md:w-48 flex justify-end gap-4 pointer-events-none z-0">
         <div className="w-10 md:w-14 h-full bg-red-600 animate-strap-fast shadow-xl opacity-90"></div>
         <div className="w-10 md:w-14 h-full bg-blue-700 animate-strap-slow shadow-xl opacity-90"></div>
@@ -75,7 +74,6 @@ export default function Blog() {
       <BackgroundPattern />
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 py-20">
-        {/* Header Section */}
         <div className="max-w-2xl mb-16">
           <span className="text-xs font-bold uppercase tracking-widest text-red-600 mb-2 block">Journal & Grooming Tips</span>
           <h1 className="font-modern-title text-5xl md:text-7xl font-medium tracking-tight mb-6">
@@ -86,7 +84,6 @@ export default function Blog() {
           </p>
         </div>
 
-        {/* Filter and Control Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-12 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200/80 shadow-sm">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -103,7 +100,6 @@ export default function Blog() {
           </div>
         </div>
 
-        {/* Post Grid Layout */}
         {filteredPosts.length === 0 ? (
           <div className="text-center py-24 bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm">
             <Sparkles className="w-12 h-12 text-slate-300 mx-auto mb-4" />
@@ -116,45 +112,57 @@ export default function Blog() {
               return (
                 <article 
                   key={post.id} 
-                  className={`group relative bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                  className={`group relative bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden ${
                     idx % 2 === 0 ? 'border-t-4 border-t-red-600' : 'border-t-4 border-t-blue-700'
                   }`}
                 >
-                  <div>
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 text-slate-700 rounded-full">
-                        Article #{post.id}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                        <MessageSquare className="w-4 h-4" /> Barber's Desk
+                  {post.image_url && (
+                    <div className="w-full h-56 overflow-hidden bg-slate-100">
+                      <img 
+                        src={post.image_url} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-8 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-center mb-6">
+                        <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 text-slate-700 rounded-full">
+                          Article #{post.id}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                          <MessageSquare className="w-4 h-4" /> Barber's Desk
+                        </div>
                       </div>
+
+                      <h2 className="font-modern-title text-2xl md:text-3xl font-bold mb-4 text-slate-900 group-hover:text-blue-700 transition-colors">
+                        {post.title}
+                      </h2>
+                      <p className="text-slate-600 font-medium leading-relaxed mb-8">
+                        {post.content}
+                      </p>
                     </div>
 
-                    <h2 className="font-modern-title text-2xl md:text-3xl font-bold mb-4 text-slate-900 group-hover:text-blue-700 transition-colors">
-                      {post.title}
-                    </h2>
-                    <p className="text-slate-600 font-medium leading-relaxed mb-8">
-                      {post.content}
-                    </p>
-                  </div>
+                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-sm font-bold text-slate-900">
+                        {post.likes} <span className="text-slate-500 font-normal">Appreciations</span>
+                      </span>
 
-                  <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-900">
-                      {post.likes} <span className="text-slate-500 font-normal">Appreciations</span>
-                    </span>
-
-                    <button 
-                      onClick={() => toggleLike(post.id)}
-                      disabled={isLiked}
-                      className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all duration-200 ${
-                        isLiked 
-                          ? 'bg-red-50 text-red-600 border border-red-200 cursor-not-allowed' 
-                          : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md active:scale-95'
-                      }`}
-                    >
-                      <Heart className={`w-4 h-4 ${isLiked ? 'fill-current text-red-600' : ''}`} />
-                      {isLiked ? 'Saved' : 'Like Post'}
-                    </button>
+                      <button 
+                        onClick={() => toggleLike(post.id)}
+                        disabled={isLiked}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider transition-all duration-200 ${
+                          isLiked 
+                            ? 'bg-red-50 text-red-600 border border-red-200 cursor-not-allowed' 
+                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md active:scale-95'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${isLiked ? 'fill-current text-red-600' : ''}`} />
+                        {isLiked ? 'Saved' : 'Like Post'}
+                      </button>
+                    </div>
                   </div>
                 </article>
               );

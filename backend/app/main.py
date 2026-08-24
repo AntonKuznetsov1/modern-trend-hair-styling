@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from typing import Optional
+
 from app.models.models import Booking, BlogPost, AvailableTime
 from app.services.email import send_system_email
 from app.core.database import get_db
@@ -22,35 +25,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/api/bookings")
-def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
-    new_booking = Booking(
-        name=booking.name, 
-        email=booking.email, 
-        date=booking.date, 
-        time=booking.time
-    )
-    db.add(new_booking)
-    db.commit()
-    send_system_email("New Booking", f"Booking for {booking.date} at {booking.time}.")
-    return {"message": "Booking created"}
-
-@app.get("/api/bookings")
-def get_bookings(db: Session = Depends(get_db)):
-    return db.query(Booking).all()
-
-@app.delete("/api/bookings/{booking_id}")
-def delete_booking(booking_id: int, db: Session = Depends(get_db)):
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    db.delete(booking)
-    db.commit()
-    return {"message": "Booking deleted"}
+class BlogCreate(BaseModel):
+    title: str
+    content: str
+    image_url: Optional[str] = None
 
 @app.get("/api/blogs")
 def get_blogs(db: Session = Depends(get_db)):
-    return db.query(BlogPost).all()
+    return db.query(BlogPost).order_by(BlogPost.id.desc()).all()
+
+@app.post("/api/blogs")
+def create_blog(blog: BlogCreate, db: Session = Depends(get_db)):
+    new_post = BlogPost(
+        title=blog.title,
+        content=blog.content,
+        image_url=blog.image_url,
+        likes=0
+    )
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
+
+@app.delete("/api/blogs/{post_id}")
+def delete_blog(post_id: int, db: Session = Depends(get_db)):
+    post = db.query(BlogPost).filter(BlogPost.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Blog post not found")
+    db.delete(post)
+    db.commit()
+    return {"message": "Post deleted"}
 
 @app.post("/api/blogs/{post_id}/like")
 def like_blog(post_id: int, db: Session = Depends(get_db)):
@@ -59,10 +63,3 @@ def like_blog(post_id: int, db: Session = Depends(get_db)):
         post.likes += 1
         db.commit()
     return {"message": "Liked"}
-
-@app.post("/api/admin/schedule")
-def set_exception(date: str, is_blocked: bool, db: Session = Depends(get_db)):
-    exception = AvailableTime(date_exception=date, is_blocked=is_blocked)
-    db.add(exception)
-    db.commit()
-    return {"message": "Schedule updated"}

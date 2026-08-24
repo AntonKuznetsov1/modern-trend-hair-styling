@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, CheckCircle, RefreshCw } from 'lucide-react';
+import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, CheckCircle, RefreshCw, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState('bookings');
@@ -8,6 +9,13 @@ export default function Admin() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
+
+  // Blog Form State
+  const [blogTitle, setBlogTitle] = useState('');
+  const [blogContent, setBlogContent] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [publishing, setPublishing] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
 
@@ -30,6 +38,76 @@ export default function Admin() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handlePublishBlog = async (e) => {
+    e.preventDefault();
+    if (!blogTitle.trim() || !blogContent.trim()) {
+      alert("Please fill in both title and content.");
+      return;
+    }
+
+    setPublishing(true);
+    let imageUrl = null;
+
+    try {
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+        const { data, error } = await supabase.storage
+          .from('blog-images')
+          .upload(fileName, imageFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) throw error;
+
+        const { data: publicData } = supabase.storage
+          .from('blog-images')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicData.publicUrl;
+      }
+
+      const res = await axios.post(`${API_URL}/api/blogs`, {
+        title: blogTitle,
+        content: blogContent,
+        image_url: imageUrl
+      });
+
+      setBlogs([res.data, ...blogs]);
+      setBlogTitle('');
+      setBlogContent('');
+      setImageFile(null);
+      setImagePreview(null);
+      alert("Article published successfully!");
+    } catch (err) {
+      console.error("Error publishing blog post:", err);
+      alert("Failed to publish post. Check console for details.");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleDeleteBlog = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this article?")) return;
+    try {
+      await axios.delete(`${API_URL}/api/blogs/${id}`);
+      setBlogs(blogs.filter(b => b.id !== id));
+    } catch (err) {
+      console.error("Failed to delete blog:", err);
+      alert("Error deleting article.");
+    }
+  };
 
   const handleCancelBooking = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
@@ -54,7 +132,7 @@ export default function Admin() {
         `}
       </style>
 
-      {/* Dark Modern Sidebar Navigation */}
+      {/* Sidebar Navigation */}
       <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center gap-3 mb-10 pb-6 border-b border-slate-800">
@@ -101,7 +179,7 @@ export default function Admin() {
         </div>
       </aside>
 
-      {/* Main Content Dashboard */}
+      {/* Main Content */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto bg-slate-950">
         
         {/* Dynamic Operational Metrics */}
@@ -196,35 +274,99 @@ export default function Admin() {
 
         {/* TAB 2: BLOG MANAGER */}
         {activeTab === 'blog' && (
-          <div className="space-y-6 max-w-3xl">
-            <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Create New Article</h2>
-            
-            <form className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. Master Beard Styling in 5 Steps" 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors" 
-                />
-              </div>
+          <div className="space-y-10 max-w-4xl">
+            <div>
+              <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Create New Article</h2>
+              
+              <form onSubmit={handlePublishBlog} className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
+                  <input 
+                    type="text" 
+                    value={blogTitle}
+                    onChange={(e) => setBlogTitle(e.target.value)}
+                    placeholder="e.g. Master Beard Styling in 5 Steps" 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors" 
+                  />
+                </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
-                <textarea 
-                  rows="6" 
-                  placeholder="Write your editorial content here..." 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors resize-none"
-                ></textarea>
-              </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cover Image (Supabase Storage)</label>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors">
+                      <Upload className="w-4 h-4 text-blue-400" />
+                      Choose File
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden" 
+                      />
+                    </label>
+                    <span className="text-xs text-slate-500 font-medium">
+                      {imageFile ? imageFile.name : 'No image selected'}
+                    </span>
+                  </div>
 
-              <button 
-                type="button" 
-                className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
-              >
-                <Send className="w-4 h-4" /> Publish Insight
-              </button>
-            </form>
+                  {imagePreview && (
+                    <div className="mt-4 relative w-full h-48 rounded-xl overflow-hidden border border-slate-800">
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
+                  <textarea 
+                    rows="6" 
+                    value={blogContent}
+                    onChange={(e) => setBlogContent(e.target.value)}
+                    placeholder="Write your editorial content here..." 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors resize-none"
+                  ></textarea>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={publishing}
+                  className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
+                >
+                  <Send className="w-4 h-4" /> {publishing ? 'Uploading & Publishing...' : 'Publish Insight'}
+                </button>
+              </form>
+            </div>
+
+            {/* Published Articles List */}
+            <div>
+              <h3 className="font-modern-title text-xl font-bold text-white mb-4">Published Articles ({blogs.length})</h3>
+              <div className="space-y-4">
+                {blogs.map(blog => (
+                  <div key={blog.id} className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      {blog.image_url ? (
+                        <img src={blog.image_url} alt={blog.title} className="w-14 h-14 rounded-xl object-cover border border-slate-800" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600">
+                          <ImageIcon className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-bold text-white text-base">{blog.title}</h4>
+                        <p className="text-xs text-slate-400 line-clamp-1">{blog.content}</p>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => handleDeleteBlog(blog.id)}
+                      className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20 transition-colors"
+                      title="Delete Article"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -232,10 +374,8 @@ export default function Admin() {
         {activeTab === 'schedule' && (
           <div className="space-y-6 max-w-2xl">
             <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Availability Settings</h2>
-            
             <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
               <p className="text-slate-400 text-sm font-medium">Block specific dates for holidays or staff training.</p>
-              
               <div className="flex flex-col sm:flex-row gap-4 items-end">
                 <div className="flex-1 w-full">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Exception Date</label>

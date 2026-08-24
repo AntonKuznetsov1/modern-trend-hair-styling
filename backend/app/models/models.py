@@ -17,6 +17,7 @@ class BlogPost(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     content = Column(Text)
+    image_url = Column(String, nullable=True)
     likes = Column(Integer, default=0)
 
 class AvailableTime(Base):
