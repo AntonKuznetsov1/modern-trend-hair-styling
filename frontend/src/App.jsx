@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-import Home from './pages/Home';
+// Pointing to Landing.jsx instead of Home.jsx
+import Landing from './pages/Landing';
 import Blog from './pages/Blog';
 import Booking from './pages/Booking';
 import Admin from './pages/Admin';
@@ -13,20 +14,17 @@ function AppLayout() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hide public Navbar on Admin pages */}
       {!isAdmin && <Navbar />}
 
-      {/* Main content container */}
       <div className={`flex-grow ${!isAdmin ? 'pt-20' : ''}`}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
 
-      {/* Hide public Footer on Admin pages */}
       {!isAdmin && <Footer />}
     </div>
   );
