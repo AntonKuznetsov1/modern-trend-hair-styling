@@ -8,13 +8,11 @@ import Blog from './pages/Blog';
 import Booking from './pages/Booking';
 import Admin from './pages/Admin';
 
-// Smooth scroll handler for anchor links (/#contact, /#services)
 function ScrollToHash() {
   const { hash, pathname } = useLocation();
 
   useEffect(() => {
     if (hash) {
-      // Small delay ensures DOM elements render before scrolling
       const timer = setTimeout(() => {
         const targetId = hash.replace('#', '');
         const element = document.getElementById(targetId);
@@ -41,7 +39,8 @@ function AppLayout() {
       <ScrollToHash />
       {!isAdmin && <Navbar />}
 
-      <div className={`flex-grow ${!isAdmin ? 'pt-20' : ''}`}>
+      {/* Removed pt-20 to allow navbar overlay directly over page content */}
+      <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/blog" element={<Blog />} />
