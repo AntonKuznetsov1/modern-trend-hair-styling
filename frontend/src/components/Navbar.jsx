@@ -22,10 +22,9 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Services', path: '/#services' },
+    { name: 'Booking', path: '/booking' },
     { name: 'Blog', path: '/blog' },
     { name: 'Contact', path: '/#contact' },
-    { name: 'Admin', path: '/admin' }
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -115,12 +114,6 @@ export default function Navbar() {
           </nav>
 
           <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
-            <a 
-              href="tel:+15064728199" 
-              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 font-bold text-xs text-slate-800"
-            >
-              <Phone className="w-4 h-4 text-blue-700" /> Call (506) 472-8199
-            </a>
             <Link
               to="/booking"
               className="bg-blue-700 text-white font-bold text-xs uppercase tracking-wider py-3.5 rounded-xl text-center shadow-md flex items-center justify-center gap-2"

@@ -187,7 +187,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <form onSubmit={(e) => e.preventDefault()} className="bg-white/5 p-8 md:p-10 rounded-3xl border border-white/10 flex flex-col gap-6">
+          <form id="contact" onSubmit={(e) => e.preventDefault()} className="bg-white/5 p-8 md:p-10 rounded-3xl border border-white/10 flex flex-col gap-6">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Full Name</label>
               <input type="text" placeholder="Your name" className="w-full bg-white/10 border border-white/10 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" required />
@@ -211,15 +211,6 @@ export default function Landing() {
 
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="py-8 px-8 md:px-16 bg-slate-950 text-slate-500 text-sm border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <p>© Modern Trend Hair Styling. All rights reserved.</p>
-        <div className="flex gap-6">
-          <Link to="/booking" className="hover:text-slate-300 transition-colors">Booking</Link>
-          <Link to="/blog" className="hover:text-slate-300 transition-colors">Blog</Link>
-        </div>
-      </footer>
     </div>
   );
 }
