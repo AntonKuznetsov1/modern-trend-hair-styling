@@ -134,12 +134,6 @@ export default function Navbar() {
               </nav>
 
               <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
-                <a 
-                  href="tel:+15064728199" 
-                  className="flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-100 font-bold text-xs text-slate-900 active:scale-98 transition-all"
-                >
-                  <Phone className="w-4 h-4 text-blue-700" /> Call (506) 472-8199
-                </a>
                 <Link
                   to="/booking"
                   onClick={toggleMenu}
