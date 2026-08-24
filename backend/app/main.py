@@ -1,18 +1,39 @@
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.models.models import Booking, BlogPost, AvailableTime
 from app.services.email import send_system_email
 from app.core.database import get_db
-# Assume get_db is a dependency yielding a database session
+from app.schemas.schemas import BookingCreate
 
 app = FastAPI()
 
+# Configured origins to bypass browser CORS policies
+origins = [
+    "https://modern-trend-hair-styling.pages.dev",
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.post("/api/bookings")
-def create_booking(name: str, email: str, date: str, time: str, db: Session = Depends(get_db)):
-    new_booking = Booking(name=name, email=email, date=date, time=time)
+def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
+    new_booking = Booking(
+        name=booking.name, 
+        email=booking.email, 
+        date=booking.date, 
+        time=booking.time
+    )
     db.add(new_booking)
     db.commit()
-    send_system_email("New Booking", f"Booking for {date} at {time}.")
+    send_system_email("New Booking", f"Booking for {booking.date} at {booking.time}.")
     return {"message": "Booking created"}
 
 @app.get("/api/blogs")
@@ -29,7 +50,6 @@ def like_blog(post_id: int, db: Session = Depends(get_db)):
 
 @app.post("/api/admin/schedule")
 def set_exception(date: str, is_blocked: bool, db: Session = Depends(get_db)):
-    # Add authentication dependency using ADMIN_PASSWORD here
     exception = AvailableTime(date_exception=date, is_blocked=is_blocked)
     db.add(exception)
     db.commit()

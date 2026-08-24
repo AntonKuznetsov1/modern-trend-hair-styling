@@ -31,8 +31,12 @@ export default function Booking() {
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
-      await axios.post(`${API_URL}/api/bookings`, null, {
-        params: { name, email, date, time }
+      // Send payload as JSON body to match backend Pydantic schema
+      await axios.post(`${API_URL}/api/bookings`, {
+        name,
+        email,
+        date,
+        time
       });
       alert(`Success! Your appointment for ${date} at ${time} is pending confirmation.`);
       setStep(1); setDate(''); setTime(''); setName(''); setEmail('');
