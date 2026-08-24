@@ -1,8 +1,49 @@
-import { useState } from 'react';
-import { Calendar, FileText, Clock, Mail, XCircle, LayoutDashboard, Send, ShieldAlert, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, CheckCircle, RefreshCw } from 'lucide-react';
+import axios from 'axios';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState('bookings');
+  const [bookings, setBookings] = useState([]);
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState(null);
+
+  const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [bookingsRes, blogsRes] = await Promise.all([
+        axios.get(`${API_URL}/api/bookings`),
+        axios.get(`${API_URL}/api/blogs`)
+      ]);
+      setBookings(bookingsRes.data);
+      setBlogs(blogsRes.data);
+    } catch (err) {
+      console.error("Failed to fetch admin data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleCancelBooking = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+    setCancellingId(id);
+    try {
+      await axios.delete(`${API_URL}/api/bookings/${id}`);
+      setBookings(prev => prev.filter(b => b.id !== id));
+    } catch (err) {
+      console.error("Failed to cancel booking:", err);
+      alert("Error deleting booking. Please try again.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen flex bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
@@ -16,7 +57,6 @@ export default function Admin() {
       {/* Dark Modern Sidebar Navigation */}
       <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6">
         <div>
-          {/* Brand Logo Header */}
           <div className="flex items-center gap-3 mb-10 pb-6 border-b border-slate-800">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-lg font-bold text-lg">
               MT
@@ -27,7 +67,6 @@ export default function Admin() {
             </div>
           </div>
 
-          {/* Navigation Links */}
           <nav className="space-y-2">
             {[
               { id: 'bookings', label: 'Bookings', icon: Calendar },
@@ -54,20 +93,23 @@ export default function Admin() {
           </nav>
         </div>
 
-        <div className="pt-6 border-t border-slate-800 text-xs text-slate-500 font-medium">
-          System Operational • v2.4
+        <div className="pt-6 border-t border-slate-800 text-xs text-slate-500 font-medium flex items-center justify-between">
+          <span>System Operational</span>
+          <button onClick={fetchData} title="Refresh Data" className="hover:text-white transition-colors">
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+          </button>
         </div>
       </aside>
 
       {/* Main Content Dashboard */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto bg-slate-950">
         
-        {/* Top Operational Metrics */}
+        {/* Dynamic Operational Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Active Bookings</p>
-              <p className="text-3xl font-bold font-modern-title mt-1 text-white">12</p>
+              <p className="text-3xl font-bold font-modern-title mt-1 text-white">{bookings.length}</p>
             </div>
             <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl">
               <Calendar className="w-6 h-6" />
@@ -77,7 +119,7 @@ export default function Admin() {
           <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Published Posts</p>
-              <p className="text-3xl font-bold font-modern-title mt-1 text-white">8</p>
+              <p className="text-3xl font-bold font-modern-title mt-1 text-white">{blogs.length}</p>
             </div>
             <div className="p-3 bg-red-600/10 text-red-400 rounded-xl">
               <FileText className="w-6 h-6" />
@@ -101,30 +143,54 @@ export default function Admin() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-modern-title text-3xl font-bold text-white">Manage Bookings</h2>
               <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-full">
-                Realtime Feed
+                Realtime Feed ({bookings.length})
               </span>
             </div>
 
-            <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold text-white">John Doe</span>
-                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">
-                    Confirmed
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-slate-400 mt-1">Aug 25, 2026 • 10:30 AM</p>
+            {loading ? (
+              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-400 font-medium">
+                Loading appointments...
               </div>
+            ) : bookings.length === 0 ? (
+              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-500 font-medium">
+                No active bookings recorded yet.
+              </div>
+            ) : (
+              bookings.map((item) => (
+                <div 
+                  key={item.id} 
+                  className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors"
+                >
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-bold text-white">{item.name}</span>
+                      <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">
+                        Confirmed
+                      </span>
+                    </div>
+                    <p className="text-sm font-medium text-slate-400 mt-1">
+                      {item.date} • {item.time} ({item.email})
+                    </p>
+                  </div>
 
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                <button className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
-                  <Mail className="w-4 h-4 text-blue-400" /> Email Client
-                </button>
-                <button className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
-                  <XCircle className="w-4 h-4" /> Cancel
-                </button>
-              </div>
-            </div>
+                  <div className="flex items-center gap-3 w-full md:w-auto">
+                    <a 
+                      href={`mailto:${item.email}`}
+                      className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
+                    >
+                      <Mail className="w-4 h-4 text-blue-400" /> Email Client
+                    </a>
+                    <button 
+                      onClick={() => handleCancelBooking(item.id)}
+                      disabled={cancellingId === item.id}
+                      className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50"
+                    >
+                      <XCircle className="w-4 h-4" /> {cancellingId === item.id ? 'Cancelling...' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 

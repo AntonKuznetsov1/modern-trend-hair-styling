@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app.models.models import Booking, BlogPost, AvailableTime
@@ -8,7 +8,6 @@ from app.schemas.schemas import BookingCreate
 
 app = FastAPI()
 
-# Configured origins to bypass browser CORS policies
 origins = [
     "https://modern-trend-hair-styling.pages.dev",
     "http://localhost:5173",
@@ -35,6 +34,19 @@ def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
     db.commit()
     send_system_email("New Booking", f"Booking for {booking.date} at {booking.time}.")
     return {"message": "Booking created"}
+
+@app.get("/api/bookings")
+def get_bookings(db: Session = Depends(get_db)):
+    return db.query(Booking).all()
+
+@app.delete("/api/bookings/{booking_id}")
+def delete_booking(booking_id: int, db: Session = Depends(get_db)):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    db.delete(booking)
+    db.commit()
+    return {"message": "Booking deleted"}
 
 @app.get("/api/blogs")
 def get_blogs(db: Session = Depends(get_db)):
