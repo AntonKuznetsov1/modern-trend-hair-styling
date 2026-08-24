@@ -66,7 +66,7 @@ export default function Landing() {
         </h1>
         
         <p className="text-lg md:text-xl text-slate-700 mb-10 leading-relaxed max-w-lg font-medium bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-100 shadow-sm">
-          Your premier barbershop specializing in men's styling, precision beard trimming, and standard military cuts. Ladies' cuts also welcome. Open Monday through Saturday.
+          Delivering distinguished grooming services with a focus on custom men's styling, sharp beard maintenance, and traditional military standards. Comprehensive cuts available for all clients.
         </p>
         
         {/* Action Buttons */}
