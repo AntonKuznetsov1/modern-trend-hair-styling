@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, CheckCircle, RefreshCw, Upload, Image as ImageIcon, Trash2, Plus, CalendarX, PlusCircle, Ban } from 'lucide-react';
+import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, RefreshCw, Upload, Image as ImageIcon, Trash2, Plus, CalendarX, PlusCircle, Ban, Lock, LogOut } from 'lucide-react';
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
 
 export default function Admin() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [loggingIn, setLoggingIn] = useState(false);
+
   const [activeTab, setActiveTab] = useState('bookings');
   const [bookings, setBookings] = useState([]);
   const [blogs, setBlogs] = useState([]);
@@ -34,6 +39,36 @@ export default function Admin() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
 
+  useEffect(() => {
+    const token = sessionStorage.getItem('admin_token');
+    if (token === 'admin-session-active') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoggingIn(true);
+    setAuthError('');
+    try {
+      const res = await axios.post(`${API_URL}/api/admin/login`, { password: passwordInput });
+      if (res.data.authenticated) {
+        sessionStorage.setItem('admin_token', res.data.token);
+        setIsAuthenticated(true);
+        setPasswordInput('');
+      }
+    } catch (err) {
+      setAuthError('Incorrect password. Access denied.');
+    } finally {
+      setLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('admin_token');
+    setIsAuthenticated(false);
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -53,8 +88,10 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -79,7 +116,7 @@ export default function Admin() {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from('blog-images')
           .upload(fileName, imageFile, { cacheControl: '3600', upsert: false });
 
@@ -135,7 +172,6 @@ export default function Admin() {
     }
   };
 
-  // Availability Actions
   const handleAddDefaultSlot = async (e) => {
     e.preventDefault();
     if (!newDefaultTime) return;
@@ -204,6 +240,59 @@ export default function Admin() {
     } catch (err) { console.error(err); }
   };
 
+  // --- LOGIN SCREEN ---
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 font-sans text-slate-100">
+        <style>
+          {`
+            @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+            .font-modern-title { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+          `}
+        </style>
+
+        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 bg-gradient-to-tr from-red-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg font-bold text-xl text-white">
+              <Lock className="w-7 h-7" />
+            </div>
+            <h1 className="font-modern-title text-2xl font-bold tracking-tight text-white mt-4">Admin Authentication</h1>
+            <p className="text-xs text-slate-400 font-medium">Enter system access key to access management dashboard.</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Password</label>
+              <input 
+                type="password" 
+                value={passwordInput} 
+                onChange={(e) => setPasswordInput(e.target.value)} 
+                placeholder="••••••••••••"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white focus:outline-none focus:border-blue-700 font-medium text-sm transition-colors"
+                required
+              />
+            </div>
+
+            {authError && (
+              <p className="text-xs font-bold text-red-400 bg-red-950/40 border border-red-800/50 p-3 rounded-xl text-center">
+                {authError}
+              </p>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loggingIn} 
+              className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 text-sm"
+            >
+              {loggingIn ? 'Authenticating...' : 'Unlock Console'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // --- ADMIN DASHBOARD ---
   return (
     <div className="min-h-screen flex bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
       <style>
@@ -250,18 +339,27 @@ export default function Admin() {
           </nav>
         </div>
 
-        <div className="pt-6 border-t border-slate-800 text-xs text-slate-500 font-medium flex items-center justify-between">
-          <span>System Operational</span>
-          <button onClick={fetchData} title="Refresh Data" className="hover:text-white transition-colors">
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+        <div className="space-y-4">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-red-400 py-3 rounded-xl text-xs font-bold transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Exit Session
           </button>
+
+          <div className="pt-4 border-t border-slate-800 text-xs text-slate-500 font-medium flex items-center justify-between">
+            <span>System Operational</span>
+            <button onClick={fetchData} title="Refresh Data" className="hover:text-white transition-colors">
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto bg-slate-950">
         
-        {/* Top Operational Metrics */}
+        {/* Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>

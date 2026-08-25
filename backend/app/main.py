@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -27,6 +28,9 @@ app.add_middleware(
 )
 
 # --- Schemas ---
+class AdminLogin(BaseModel):
+    password: str
+
 class BlogCreate(BaseModel):
     title: str
     content: str
@@ -47,6 +51,15 @@ class BlockedDateCreate(BaseModel):
 class DateSlotCreate(BaseModel):
     date: str
     time: str
+
+
+# --- Admin Authentication Endpoint ---
+@app.post("/api/admin/login")
+def admin_login(payload: AdminLogin):
+    admin_password = os.environ.get("ADMIN_PASSWORD", "password")
+    if payload.password == admin_password:
+        return {"authenticated": True, "token": "admin-session-active"}
+    raise HTTPException(status_code=401, detail="Invalid admin password")
 
 
 # --- Blog Endpoints ---
@@ -87,7 +100,6 @@ def get_bookings(db: Session = Depends(get_db)):
 
 @app.post("/api/bookings")
 def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
-    # Verify slot is not already booked
     existing = db.query(Booking).filter(
         Booking.date == booking.date, 
         Booking.time == booking.time,
@@ -121,22 +133,18 @@ def delete_booking(booking_id: int, db: Session = Depends(get_db)):
 # --- Availability Endpoints ---
 @app.get("/api/availability/slots")
 def get_available_slots(date: str = Query(...), db: Session = Depends(get_db)):
-    # 1. Check if entire date is blocked
     is_blocked_date = db.query(BlockedDate).filter(BlockedDate.date == date).first()
     if is_blocked_date:
         return []
 
-    # 2. Collect default times + custom times for this date
     default_times = [s.time for s in db.query(DefaultSlot).all()]
     custom_times = [c.time for c in db.query(CustomSlot).filter(CustomSlot.date == date).all()]
     
     all_times = set(default_times + custom_times)
 
-    # 3. Remove specifically blocked times for this date
     blocked_times = set([b.time for b in db.query(BlockedTime).filter(BlockedTime.date == date).all()])
     available = all_times - blocked_times
 
-    # 4. Remove already booked times for this date
     booked_times = set([b.time for b in db.query(Booking).filter(
         Booking.date == date, 
         Booking.status != "cancelled"
