@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Clock, User, Mail, CheckCircle2, ChevronRight, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
+import { Heart, Search, Sparkles, MessageSquare, Tag } from 'lucide-react';
 import axios from 'axios';
 
 const BackgroundPattern = () => (
@@ -17,48 +17,45 @@ const BackgroundPattern = () => (
   </div>
 );
 
-export default function Booking() {
-  const [step, setStep] = useState(1);
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [availableTimes, setAvailableTimes] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+export default function Blog() {
+  const [posts, setPosts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
 
-  useEffect(() => {
-    if (!date) return;
-    setLoadingSlots(true);
-    axios.get(`${API_URL}/api/availability/slots?date=${date}`)
-      .then(res => {
-        setAvailableTimes(res.data);
-      })
-      .catch(err => {
-        console.error("Error fetching available slots:", err);
-        setAvailableTimes([]);
-      })
-      .finally(() => setLoadingSlots(false));
-  }, [date, API_URL]);
+  const [likedPosts, setLikedPosts] = useState(() => {
+    const saved = localStorage.getItem('likedPosts');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const handleConfirm = async () => {
-    setIsSubmitting(true);
-    try {
-      await axios.post(`${API_URL}/api/bookings`, { name, email, date, time });
-      alert(`Success! Your appointment for ${date} at ${time} is pending confirmation.`);
-      setStep(1); setDate(''); setTime(''); setName(''); setEmail('');
-    } catch (error) {
-      console.error("Booking error:", error);
-      alert("Selected slot is no longer available or an error occurred.");
-    } finally {
-      setIsSubmitting(false);
+  useEffect(() => {
+    localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
+  }, [likedPosts]);
+
+  useEffect(() => {
+    axios.get(`${API_URL}/api/blogs`)
+      .then(res => setPosts(res.data))
+      .catch(err => console.error("Error fetching blogs:", err));
+  }, [API_URL]);
+
+  const toggleLike = async (id) => {
+    if (!likedPosts.includes(id)) {
+      try {
+        await axios.post(`${API_URL}/api/blogs/${id}/like`);
+        setLikedPosts([...likedPosts, id]);
+        setPosts(posts.map(p => p.id === id ? { ...p, likes: p.likes + 1 } : p));
+      } catch (err) {
+        console.error("Error liking post:", err);
+      }
     }
   };
 
+  const filteredPosts = posts.filter(post => 
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="relative min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-700 selection:text-white flex items-center justify-center py-10 sm:py-20 px-4 sm:px-6">
+    <div className="relative min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-700 selection:text-white">
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
@@ -69,162 +66,121 @@ export default function Booking() {
         `}
       </style>
 
-      <BackgroundPattern />
-      <div className="absolute top-0 right-4 sm:right-12 md:right-28 bottom-0 w-16 sm:w-24 md:w-36 flex justify-end gap-2 sm:gap-4 pointer-events-none z-0 opacity-40 sm:opacity-100">
-        <div className="w-6 sm:w-8 md:w-12 h-full bg-red-600 animate-strap-fast shadow-xl"></div>
-        <div className="w-6 sm:w-8 md:w-12 h-full bg-blue-700 animate-strap-slow shadow-xl"></div>
+      <div className="absolute top-0 right-4 sm:right-8 md:right-24 h-48 sm:h-64 w-20 sm:w-32 md:w-48 flex justify-end gap-2 sm:gap-4 pointer-events-none z-0 opacity-40 sm:opacity-90">
+        <div className="w-8 sm:w-10 md:w-14 h-full bg-red-600 animate-strap-fast shadow-xl"></div>
+        <div className="w-8 sm:w-10 md:w-14 h-full bg-blue-700 animate-strap-slow shadow-xl"></div>
       </div>
 
-      <main className="relative z-10 w-full max-w-2xl pt-16 sm:pt-0">
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/90 shadow-2xl p-5 sm:p-8 md:p-12 overflow-hidden">
-          
-          <div className="mb-6 sm:mb-8 text-center sm:text-left">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-red-600 mb-1 sm:mb-2 block">Precision Appointment</span>
-            <h1 className="font-modern-title text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
-              Schedule <span className="text-blue-700">Service</span>
-            </h1>
-          </div>
+      <BackgroundPattern />
 
-          <div className="flex items-center justify-between mb-8 sm:mb-10 pb-4 sm:pb-6 border-b border-slate-100">
-            {[
-              { num: 1, label: 'Date' },
-              { num: 2, label: 'Time' },
-              { num: 3, label: 'Details' }
-            ].map(s => (
-              <div key={s.num} className="flex items-center gap-2 sm:gap-3">
-                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                  step === s.num ? 'bg-blue-700 text-white shadow-md scale-105 sm:scale-110' : step > s.num ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'
-                }`}>
-                  {step > s.num ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> : s.num}
-                </div>
-                <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${step === s.num ? 'text-slate-900' : 'text-slate-400'}`}>
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Step 1: Select Date */}
-          {step === 1 && (
-            <div className="space-y-4 sm:space-y-6">
-              <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
-                Choose Preferred Date
-              </label>
-              <div className="relative">
-                <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input 
-                  type="date" 
-                  value={date}
-                  onChange={(e) => { setDate(e.target.value); setStep(2); }}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full pl-12 pr-4 py-3.5 sm:py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-bold focus:outline-none focus:border-blue-700 focus:bg-white transition-all cursor-pointer shadow-sm text-sm min-h-[44px]"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Select Time */}
-          {step === 2 && (
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Slots for {date}
-                </span>
-                <button onClick={() => setStep(1)} className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 min-h-[44px] px-2">
-                  <ArrowLeft className="w-3.5 h-3.5" /> Change Date
-                </button>
-              </div>
-
-              {loadingSlots ? (
-                <div className="py-12 flex flex-col items-center justify-center text-slate-500">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-700 mb-2" />
-                  <p className="text-sm font-semibold">Checking calendar availability...</p>
-                </div>
-              ) : availableTimes.length === 0 ? (
-                <div className="p-6 sm:p-8 bg-red-50/50 border border-red-200 rounded-2xl text-center text-red-700">
-                  <AlertCircle className="w-7 h-7 sm:w-8 sm:h-8 mx-auto mb-2 text-red-600" />
-                  <p className="font-bold text-sm sm:text-base">No times available for this date.</p>
-                  <p className="text-xs text-red-600 mt-1 font-medium">The barber is off or all slots are booked. Please pick another date.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-                  {availableTimes.map(t => (
-                    <button 
-                      key={t}
-                      onClick={() => { setTime(t); setStep(3); }}
-                      className="p-3.5 sm:p-4 rounded-2xl border border-slate-200 font-bold text-xs sm:text-sm text-slate-800 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700 transition-all flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95 shadow-sm min-h-[44px]"
-                    >
-                      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 3: Details */}
-          {step === 3 && (
-            <div className="space-y-4 sm:space-y-6">
-              <div className="bg-slate-50 p-4 sm:p-6 rounded-2xl border border-slate-200/80 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] sm:text-xs uppercase tracking-wider font-bold text-slate-400">Selected Appointment</p>
-                  <p className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">{date} at {time}</p>
-                </div>
-                <button onClick={() => setStep(2)} className="text-xs font-bold text-blue-700 hover:underline min-h-[44px] flex items-center">
-                  Edit
-                </button>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4">
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 sm:mb-2">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
-                      type="text" 
-                      placeholder="John Doe" 
-                      value={name} 
-                      onChange={e => setName(e.target.value)} 
-                      className="w-full pl-12 pr-4 py-3 sm:py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-blue-700 transition-colors text-sm min-h-[44px]" 
-                      required 
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 sm:mb-2">Email Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input 
-                      type="email" 
-                      placeholder="name@example.com" 
-                      value={email} 
-                      onChange={e => setEmail(e.target.value)} 
-                      className="w-full pl-12 pr-4 py-3 sm:py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-blue-700 transition-colors text-sm min-h-[44px]" 
-                      required 
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 sm:gap-4 pt-2 sm:pt-4">
-                <button onClick={() => setStep(2)} className="flex-1 bg-slate-100 text-slate-700 font-bold py-3.5 sm:py-4 rounded-full hover:bg-slate-200 text-xs sm:text-sm min-h-[44px]">
-                  Back
-                </button>
-                <button 
-                  onClick={handleConfirm} 
-                  disabled={!name || !email || isSubmitting} 
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 sm:py-4 rounded-full shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-95 min-h-[44px]"
-                >
-                  {isSubmitting ? 'Confirming...' : 'Confirm Booking'}
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-32 md:pt-40 pb-16 sm:pb-20">
+        <div className="max-w-2xl mb-10 sm:mb-16">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-red-600 mb-1 sm:mb-2 block">Journal & Grooming Tips</span>
+          <h1 className="font-modern-title text-4xl sm:text-5xl md:text-7xl font-medium tracking-tight mb-4 sm:mb-6">
+            Style <span className="text-blue-700 font-bold">Insights</span>
+          </h1>
+          <p className="text-slate-600 text-sm sm:text-lg font-medium leading-relaxed bg-white/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+            Expert hair care advice, beard maintenance guides, and traditional styling standards direct from our master barbers.
+          </p>
         </div>
+
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 mb-8 sm:mb-12 bg-white/90 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text"
+              placeholder="Search articles & guides..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-700 transition-colors min-h-[44px]"
+            />
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 px-2">
+            <Tag className="w-4 h-4 text-red-600" /> Total Articles: {filteredPosts.length}
+          </div>
+        </div>
+
+        {filteredPosts.length === 0 ? (
+          <div className="text-center py-16 sm:py-24 bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm p-4">
+            <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-slate-300 mx-auto mb-3 sm:mb-4" />
+            <p className="text-slate-500 font-semibold text-base sm:text-lg">No matching insights found.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {filteredPosts.map((post, idx) => {
+              const isLiked = likedPosts.includes(post.id);
+              return (
+                <article 
+                  key={post.id} 
+                  className={`group relative bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden ${
+                    idx % 2 === 0 ? 'border-t-4 border-t-red-600' : 'border-t-4 border-t-blue-700'
+                  }`}
+                >
+                  {/* Editorial Aspect Ratio Card Header */}
+                  {post.image_url && (
+                    <div className="relative w-full aspect-[16/10] overflow-hidden bg-slate-100 border-b border-slate-100">
+                      <img 
+                        src={post.image_url} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
+                      <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex justify-between items-center text-white z-10">
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/20">
+                          Article #{post.id}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-white/90 bg-slate-950/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+                          <MessageSquare className="w-3.5 h-3.5" /> Barber's Desk
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-5 sm:p-8 flex-1 flex flex-col justify-between">
+                    <div>
+                      {!post.image_url && (
+                        <div className="flex justify-between items-center mb-4 sm:mb-6">
+                          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full">
+                            Article #{post.id}
+                          </span>
+                          <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-500">
+                            <MessageSquare className="w-3.5 h-3.5" /> Barber's Desk
+                          </div>
+                        </div>
+                      )}
+
+                      <h2 className="font-modern-title text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-slate-900 group-hover:text-blue-700 transition-colors">
+                        {post.title}
+                      </h2>
+                      <p className="text-slate-600 font-medium leading-relaxed mb-6 sm:mb-8 text-xs sm:text-sm whitespace-pre-line">
+                        {post.content}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 sm:pt-6 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900">
+                        {post.likes} <span className="text-slate-500 font-normal">Appreciations</span>
+                      </span>
+
+                      <button 
+                        onClick={() => toggleLike(post.id)}
+                        disabled={isLiked}
+                        className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full font-bold text-[10px] sm:text-xs uppercase tracking-wider transition-all duration-200 min-h-[44px] ${
+                          isLiked 
+                            ? 'bg-red-50 text-red-600 border border-red-200 cursor-not-allowed' 
+                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md active:scale-95'
+                        }`}
+                      >
+                        <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLiked ? 'fill-current text-red-600' : ''}`} />
+                        {isLiked ? 'Saved' : 'Like Post'}
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </main>
     </div>
   );
