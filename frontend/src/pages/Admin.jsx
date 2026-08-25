@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, RefreshCw, Upload, Image as ImageIcon, Trash2, Plus, CalendarX, PlusCircle, Ban, Lock, LogOut } from 'lucide-react';
+import { 
+  Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, 
+  RefreshCw, Upload, Image as ImageIcon, Trash2, Plus, CalendarX, 
+  PlusCircle, Ban, Lock, LogOut, Menu, X 
+} from 'lucide-react';
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
 
@@ -10,6 +14,7 @@ export default function Admin() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   const [activeTab, setActiveTab] = useState('bookings');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [bookings, setBookings] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -243,7 +248,7 @@ export default function Admin() {
   // --- LOGIN SCREEN ---
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 font-sans text-slate-100">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 sm:p-6 font-sans text-slate-100">
         <style>
           {`
             @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
@@ -251,12 +256,12 @@ export default function Admin() {
           `}
         </style>
 
-        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-gradient-to-tr from-red-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg font-bold text-xl text-white">
-              <Lock className="w-7 h-7" />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-tr from-red-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto shadow-lg font-bold text-xl text-white">
+              <Lock className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
-            <h1 className="font-modern-title text-2xl font-bold tracking-tight text-white mt-4">Admin Authentication</h1>
+            <h1 className="font-modern-title text-xl sm:text-2xl font-bold tracking-tight text-white mt-4">Admin Authentication</h1>
             <p className="text-xs text-slate-400 font-medium">Enter system access key to access management dashboard.</p>
           </div>
 
@@ -268,7 +273,7 @@ export default function Admin() {
                 value={passwordInput} 
                 onChange={(e) => setPasswordInput(e.target.value)} 
                 placeholder="••••••••••••"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white focus:outline-none focus:border-blue-700 font-medium text-sm transition-colors"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white focus:outline-none focus:border-blue-700 font-medium text-sm transition-colors"
                 required
               />
             </div>
@@ -282,7 +287,7 @@ export default function Admin() {
             <button 
               type="submit" 
               disabled={loggingIn} 
-              className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 text-sm"
+              className="w-full bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 sm:py-4 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 text-sm"
             >
               {loggingIn ? 'Authenticating...' : 'Unlock Console'}
             </button>
@@ -294,7 +299,7 @@ export default function Admin() {
 
   // --- ADMIN DASHBOARD ---
   return (
-    <div className="min-h-screen flex bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
@@ -302,17 +307,62 @@ export default function Admin() {
         `}
       </style>
 
-      {/* Sidebar */}
-      <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6">
-        <div>
-          <div className="flex items-center gap-3 mb-10 pb-6 border-b border-slate-800">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-lg font-bold text-lg">
+      {/* Mobile Top Navigation Header */}
+      <div className="md:hidden flex items-center justify-between bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-30">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-md font-bold text-xs">
               MT
             </div>
-            <div>
-              <h2 className="font-modern-title font-bold text-slate-100 tracking-tight leading-tight">Modern Trend</h2>
-              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Admin Console</p>
+            <span className="font-modern-title font-bold text-slate-100 text-sm tracking-tight">Modern Trend</span>
+          </div>
+        </div>
+
+        <button 
+          onClick={fetchData} 
+          title="Refresh Data" 
+          className="p-2.5 text-slate-400 hover:text-white transition-colors rounded-xl bg-slate-950 border border-slate-800"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+        </button>
+      </div>
+
+      {/* Mobile Backdrop Drawer Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Drawer */}
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6 transform transition-transform duration-300 ease-in-out ${
+        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        <div>
+          <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-lg font-bold text-lg">
+                MT
+              </div>
+              <div>
+                <h2 className="font-modern-title font-bold text-slate-100 tracking-tight leading-tight">Modern Trend</h2>
+                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Admin Console</p>
+              </div>
             </div>
+            <button 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="md:hidden text-slate-400 hover:text-white p-1"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           <nav className="space-y-2">
@@ -326,7 +376,10 @@ export default function Admin() {
               return (
                 <button 
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)} 
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileMenuOpen(false);
+                  }} 
                   className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${
                     isActive ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/30' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                   }`}
@@ -339,59 +392,59 @@ export default function Admin() {
           </nav>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 pt-6 md:pt-0">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-red-400 py-3 rounded-xl text-xs font-bold transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-red-400 py-3 rounded-xl text-xs font-bold transition-colors min-h-[44px]"
           >
             <LogOut className="w-4 h-4" /> Exit Session
           </button>
 
           <div className="pt-4 border-t border-slate-800 text-xs text-slate-500 font-medium flex items-center justify-between">
             <span>System Operational</span>
-            <button onClick={fetchData} title="Refresh Data" className="hover:text-white transition-colors">
+            <button onClick={fetchData} title="Refresh Data" className="hover:text-white transition-colors p-1">
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 md:p-12 overflow-y-auto bg-slate-950">
+      {/* Main Content Area */}
+      <main className="flex-1 p-4 sm:p-6 md:p-12 overflow-y-auto bg-slate-950 w-full max-w-7xl mx-auto">
         
-        {/* Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Active Bookings</p>
-              <p className="text-3xl font-bold font-modern-title mt-1 text-white">{bookings.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold font-modern-title mt-1 text-white">{bookings.length}</p>
             </div>
-            <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl"><Calendar className="w-6 h-6" /></div>
+            <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl"><Calendar className="w-5 h-5 sm:w-6 sm:h-6" /></div>
           </div>
 
-          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Published Posts</p>
-              <p className="text-3xl font-bold font-modern-title mt-1 text-white">{blogs.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold font-modern-title mt-1 text-white">{blogs.length}</p>
             </div>
-            <div className="p-3 bg-red-600/10 text-red-400 rounded-xl"><FileText className="w-6 h-6" /></div>
+            <div className="p-3 bg-red-600/10 text-red-400 rounded-xl"><FileText className="w-5 h-5 sm:w-6 sm:h-6" /></div>
           </div>
 
-          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between sm:col-span-2 lg:col-span-1">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Default Slots</p>
-              <p className="text-3xl font-bold font-modern-title mt-1 text-emerald-400">{settings.default_slots.length}</p>
+              <p className="text-2xl sm:text-3xl font-bold font-modern-title mt-1 text-emerald-400">{settings.default_slots.length}</p>
             </div>
-            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><Clock className="w-6 h-6" /></div>
+            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><Clock className="w-5 h-5 sm:w-6 sm:h-6" /></div>
           </div>
         </div>
 
         {/* TAB 1: BOOKINGS */}
         {activeTab === 'bookings' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-modern-title text-3xl font-bold text-white">Manage Bookings</h2>
-              <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white">Manage Bookings</h2>
+              <span className="self-start sm:self-auto text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-full">
                 Realtime Feed ({bookings.length})
               </span>
             </div>
@@ -404,20 +457,20 @@ export default function Admin() {
               [...bookings]
                 .sort((a, b) => b.id - a.id)
                 .map((item) => (
-                  <div key={item.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg font-bold text-white">{item.name}</span>
-                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">Confirmed</span>
+                  <div key={item.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-4 sm:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
+                    <div className="space-y-1 w-full md:w-auto">
+                      <div className="flex items-center justify-between sm:justify-start gap-3">
+                        <span className="text-base sm:text-lg font-bold text-white">{item.name}</span>
+                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">Confirmed</span>
                       </div>
-                      <p className="text-sm font-medium text-slate-400 mt-1">{item.date} • {item.time} ({item.email})</p>
+                      <p className="text-xs sm:text-sm font-medium text-slate-400 break-all sm:break-normal">{item.date} • {item.time} ({item.email})</p>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                      <a href={`mailto:${item.email}`} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                    <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto pt-2 md:pt-0 border-t border-slate-800/80 md:border-none">
+                      <a href={`mailto:${item.email}`} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors min-h-[44px]">
                         <Mail className="w-4 h-4 text-blue-400" /> Email Client
                       </a>
-                      <button onClick={() => handleCancelBooking(item.id)} disabled={cancellingId === item.id} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50">
+                      <button onClick={() => handleCancelBooking(item.id)} disabled={cancellingId === item.id} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors disabled:opacity-50 min-h-[44px]">
                         <XCircle className="w-4 h-4" /> {cancellingId === item.id ? 'Cancelling...' : 'Cancel'}
                       </button>
                     </div>
@@ -429,27 +482,27 @@ export default function Admin() {
 
         {/* TAB 2: BLOG MANAGER */}
         {activeTab === 'blog' && (
-          <div className="space-y-10 max-w-4xl">
+          <div className="space-y-8 sm:space-y-10 max-w-4xl">
             <div>
-              <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Create New Article</h2>
+              <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Create New Article</h2>
               
-              <form onSubmit={handlePublishBlog} className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+              <form onSubmit={handlePublishBlog} className="bg-slate-900 p-4 sm:p-8 rounded-2xl border border-slate-800 space-y-5 sm:space-y-6">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
-                  <input type="text" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="e.g. Master Beard Styling" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium" />
+                  <input type="text" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="e.g. Master Beard Styling" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium text-sm" />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cover Image</label>
-                  <div className="flex items-center gap-4">
-                    <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center gap-2 text-sm font-semibold text-slate-300">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-slate-300 min-h-[44px]">
                       <Upload className="w-4 h-4 text-blue-400" /> Choose File
                       <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
-                    <span className="text-xs text-slate-500">{imageFile ? imageFile.name : 'No image selected'}</span>
+                    <span className="text-xs text-slate-500 truncate">{imageFile ? imageFile.name : 'No image selected'}</span>
                   </div>
                   {imagePreview && (
-                    <div className="mt-4 relative w-full h-48 rounded-xl overflow-hidden border border-slate-800">
+                    <div className="mt-4 relative w-full h-40 sm:h-48 rounded-xl overflow-hidden border border-slate-800">
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     </div>
                   )}
@@ -457,32 +510,32 @@ export default function Admin() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
-                  <textarea rows="6" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Write your editorial content here..." className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium resize-none"></textarea>
+                  <textarea rows="6" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Write your editorial content here..." className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium text-sm resize-none"></textarea>
                 </div>
 
-                <button type="submit" disabled={publishing} className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
+                <button type="submit" disabled={publishing} className="w-full sm:w-auto bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 sm:py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 text-sm min-h-[44px]">
                   <Send className="w-4 h-4" /> {publishing ? 'Publishing...' : 'Publish Insight'}
                 </button>
               </form>
             </div>
 
             <div>
-              <h3 className="font-modern-title text-xl font-bold text-white mb-4">Published Articles ({blogs.length})</h3>
-              <div className="space-y-4">
+              <h3 className="font-modern-title text-lg sm:text-xl font-bold text-white mb-4">Published Articles ({blogs.length})</h3>
+              <div className="space-y-3 sm:space-y-4">
                 {blogs.map(blog => (
-                  <div key={blog.id} className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+                  <div key={blog.id} className="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
                       {blog.image_url ? (
-                        <img src={blog.image_url} alt={blog.title} className="w-14 h-14 rounded-xl object-cover border border-slate-800" />
+                        <img src={blog.image_url} alt={blog.title} className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-slate-800 flex-shrink-0" />
                       ) : (
-                        <div className="w-14 h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600"><ImageIcon className="w-6 h-6" /></div>
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 flex-shrink-0"><ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" /></div>
                       )}
-                      <div>
-                        <h4 className="font-bold text-white text-base">{blog.title}</h4>
+                      <div className="overflow-hidden">
+                        <h4 className="font-bold text-white text-sm sm:text-base truncate">{blog.title}</h4>
                         <p className="text-xs text-slate-400 line-clamp-1">{blog.content}</p>
                       </div>
                     </div>
-                    <button onClick={() => handleDeleteBlog(blog.id)} className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20">
+                    <button onClick={() => handleDeleteBlog(blog.id)} className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -494,19 +547,19 @@ export default function Admin() {
 
         {/* TAB 3: AVAILABILITY SETTINGS */}
         {activeTab === 'schedule' && (
-          <div className="space-y-8 max-w-4xl">
+          <div className="space-y-6 sm:space-y-8 max-w-4xl">
             <div>
-              <h2 className="font-modern-title text-3xl font-bold text-white mb-2">Schedule & Availability Controls</h2>
-              <p className="text-slate-400 text-sm">Configure standard daily hours, ban entire days or specific times, and create custom single-day slots.</p>
+              <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white mb-2">Schedule & Availability Controls</h2>
+              <p className="text-slate-400 text-xs sm:text-sm">Configure standard daily hours, ban entire days or specific times, and create custom single-day slots.</p>
             </div>
 
             {/* SECTION 1: DEFAULT SLOTS */}
-            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
-              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
+              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
                 <Clock className="w-5 h-5 text-blue-400" /> Default Recurring Slots
               </h3>
               
-              <form onSubmit={handleAddDefaultSlot} className="flex gap-4">
+              <form onSubmit={handleAddDefaultSlot} className="flex flex-col sm:flex-row gap-3">
                 <input 
                   type="text" 
                   placeholder="e.g. 09:00 AM, 02:30 PM" 
@@ -514,16 +567,16 @@ export default function Admin() {
                   onChange={e => setNewDefaultTime(e.target.value)} 
                   className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-blue-700 text-sm" 
                 />
-                <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2">
+                <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
                   <Plus className="w-4 h-4" /> Add Default
                 </button>
               </form>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5 sm:gap-3">
                 {settings.default_slots.map(s => (
-                  <div key={s.id} className="bg-slate-950 border border-slate-800 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-slate-200">
+                  <div key={s.id} className="bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-slate-200">
                     <span>{s.time}</span>
-                    <button onClick={() => handleDeleteDefaultSlot(s.id)} className="text-slate-500 hover:text-red-400 transition-colors">
+                    <button onClick={() => handleDeleteDefaultSlot(s.id)} className="text-slate-500 hover:text-red-400 transition-colors p-1">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -532,28 +585,28 @@ export default function Admin() {
             </div>
 
             {/* SECTION 2: BLOCK ENTIRE DATE */}
-            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
-              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
+              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
                 <CalendarX className="w-5 h-5 text-red-400" /> Block Entire Days (Holidays / Days Off)
               </h3>
 
-              <form onSubmit={handleBlockDate} className="flex gap-4">
+              <form onSubmit={handleBlockDate} className="flex flex-col sm:flex-row gap-3">
                 <input 
                   type="date" 
                   value={blockDateInput} 
                   onChange={e => setBlockDateInput(e.target.value)} 
                   className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-red-600 text-sm" 
                 />
-                <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2">
+                <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
                   <ShieldAlert className="w-4 h-4" /> Ban Date
                 </button>
               </form>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5 sm:gap-3">
                 {settings.blocked_dates.map(b => (
-                  <div key={b.id} className="bg-red-950/40 border border-red-800/50 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-red-200">
+                  <div key={b.id} className="bg-red-950/40 border border-red-800/50 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-red-200">
                     <span>{b.date}</span>
-                    <button onClick={() => handleUnblockDate(b.id)} className="text-red-400 hover:text-white transition-colors">
+                    <button onClick={() => handleUnblockDate(b.id)} className="text-red-400 hover:text-white transition-colors p-1">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -562,12 +615,12 @@ export default function Admin() {
             </div>
 
             {/* SECTION 3: BLOCK SPECIFIC TIME ON SPECIFIC DAY */}
-            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
-              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
+              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
                 <Ban className="w-5 h-5 text-amber-400" /> Ban Specific Time Slot on Specific Day
               </h3>
 
-              <form onSubmit={handleBlockTime} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <form onSubmit={handleBlockTime} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <input 
                   type="date" 
                   value={blockTimeDate} 
@@ -581,16 +634,16 @@ export default function Admin() {
                   onChange={e => setBlockTimeSlot(e.target.value)} 
                   className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-amber-500 text-sm" 
                 />
-                <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
                   <Ban className="w-4 h-4" /> Block Slot
                 </button>
               </form>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5 sm:gap-3">
                 {settings.blocked_times.map(bt => (
-                  <div key={bt.id} className="bg-amber-950/30 border border-amber-800/40 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-amber-200">
+                  <div key={bt.id} className="bg-amber-950/30 border border-amber-800/40 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-amber-200">
                     <span>{bt.date} @ {bt.time}</span>
-                    <button onClick={() => handleUnblockTime(bt.id)} className="text-amber-400 hover:text-white transition-colors">
+                    <button onClick={() => handleUnblockTime(bt.id)} className="text-amber-400 hover:text-white transition-colors p-1">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -599,12 +652,12 @@ export default function Admin() {
             </div>
 
             {/* SECTION 4: SINGLE-DAY CUSTOM EXTRA SLOTS */}
-            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
-              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
+              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
                 <PlusCircle className="w-5 h-5 text-emerald-400" /> Add Custom Slot for Single Day Only
               </h3>
 
-              <form onSubmit={handleAddCustomSlot} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <form onSubmit={handleAddCustomSlot} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <input 
                   type="date" 
                   value={customSlotDate} 
@@ -618,16 +671,16 @@ export default function Admin() {
                   onChange={e => setCustomSlotTime(e.target.value)} 
                   className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-emerald-500 text-sm" 
                 />
-                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
                   <PlusCircle className="w-4 h-4" /> Add Custom
                 </button>
               </form>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2.5 sm:gap-3">
                 {settings.custom_slots.map(cs => (
-                  <div key={cs.id} className="bg-emerald-950/30 border border-emerald-800/40 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-emerald-200">
+                  <div key={cs.id} className="bg-emerald-950/30 border border-emerald-800/40 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-emerald-200">
                     <span>{cs.date} @ {cs.time}</span>
-                    <button onClick={() => handleDeleteCustomSlot(cs.id)} className="text-emerald-400 hover:text-white transition-colors">
+                    <button onClick={() => handleDeleteCustomSlot(cs.id)} className="text-emerald-400 hover:text-white transition-colors p-1">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
