@@ -73,7 +73,8 @@ export default function Blog() {
 
       <BackgroundPattern />
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 py-20">
+      {/* Increased top padding (pt-32 md:pt-40) to fix navbar overlap */}
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 md:pt-40 pb-20">
         <div className="max-w-2xl mb-16">
           <span className="text-xs font-bold uppercase tracking-widest text-red-600 mb-2 block">Journal & Grooming Tips</span>
           <h1 className="font-modern-title text-5xl md:text-7xl font-medium tracking-tight mb-6">
@@ -116,31 +117,43 @@ export default function Blog() {
                     idx % 2 === 0 ? 'border-t-4 border-t-red-600' : 'border-t-4 border-t-blue-700'
                   }`}
                 >
+                  {/* Editorial Aspect Ratio Card Header */}
                   {post.image_url && (
-                    <div className="w-full h-56 overflow-hidden bg-slate-100">
+                    <div className="relative w-full aspect-[16/10] overflow-hidden bg-slate-100 border-b border-slate-100">
                       <img 
                         src={post.image_url} 
                         alt={post.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center text-white z-10">
+                        <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-white/20 backdrop-blur-md rounded-full border border-white/20">
+                          Article #{post.id}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-white/90 bg-slate-950/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+                          <MessageSquare className="w-3.5 h-3.5" /> Barber's Desk
+                        </div>
+                      </div>
                     </div>
                   )}
 
                   <div className="p-8 flex-1 flex flex-col justify-between">
                     <div>
-                      <div className="flex justify-between items-center mb-6">
-                        <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 text-slate-700 rounded-full">
-                          Article #{post.id}
-                        </span>
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-                          <MessageSquare className="w-4 h-4" /> Barber's Desk
+                      {!post.image_url && (
+                        <div className="flex justify-between items-center mb-6">
+                          <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 text-slate-700 rounded-full">
+                            Article #{post.id}
+                          </span>
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                            <MessageSquare className="w-4 h-4" /> Barber's Desk
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       <h2 className="font-modern-title text-2xl md:text-3xl font-bold mb-4 text-slate-900 group-hover:text-blue-700 transition-colors">
                         {post.title}
                       </h2>
-                      <p className="text-slate-600 font-medium leading-relaxed mb-8">
+                      <p className="text-slate-600 font-medium leading-relaxed mb-8 whitespace-pre-line">
                         {post.content}
                       </p>
                     </div>
