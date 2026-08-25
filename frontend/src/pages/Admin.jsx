@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, CheckCircle, RefreshCw, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, CheckCircle, RefreshCw, Upload, Image as ImageIcon, Trash2, Plus, CalendarX, PlusCircle, Ban } from 'lucide-react';
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
 
@@ -17,17 +17,34 @@ export default function Admin() {
   const [imagePreview, setImagePreview] = useState(null);
   const [publishing, setPublishing] = useState(false);
 
+  // Availability State
+  const [settings, setSettings] = useState({
+    default_slots: [],
+    blocked_dates: [],
+    blocked_times: [],
+    custom_slots: []
+  });
+
+  const [newDefaultTime, setNewDefaultTime] = useState('');
+  const [blockDateInput, setBlockDateInput] = useState('');
+  const [blockTimeDate, setBlockTimeDate] = useState('');
+  const [blockTimeSlot, setBlockTimeSlot] = useState('');
+  const [customSlotDate, setCustomSlotDate] = useState('');
+  const [customSlotTime, setCustomSlotTime] = useState('');
+
   const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, blogsRes] = await Promise.all([
+      const [bookingsRes, blogsRes, settingsRes] = await Promise.all([
         axios.get(`${API_URL}/api/bookings`),
-        axios.get(`${API_URL}/api/blogs`)
+        axios.get(`${API_URL}/api/blogs`),
+        axios.get(`${API_URL}/api/availability/settings`)
       ]);
       setBookings(bookingsRes.data);
       setBlogs(blogsRes.data);
+      setSettings(settingsRes.data);
     } catch (err) {
       console.error("Failed to fetch admin data:", err);
     } finally {
@@ -64,10 +81,7 @@ export default function Admin() {
 
         const { data, error } = await supabase.storage
           .from('blog-images')
-          .upload(fileName, imageFile, {
-            cacheControl: '3600',
-            upsert: false
-          });
+          .upload(fileName, imageFile, { cacheControl: '3600', upsert: false });
 
         if (error) throw error;
 
@@ -92,7 +106,7 @@ export default function Admin() {
       alert("Article published successfully!");
     } catch (err) {
       console.error("Error publishing blog post:", err);
-      alert("Failed to publish post. Check console for details.");
+      alert("Failed to publish post.");
     } finally {
       setPublishing(false);
     }
@@ -105,7 +119,6 @@ export default function Admin() {
       setBlogs(blogs.filter(b => b.id !== id));
     } catch (err) {
       console.error("Failed to delete blog:", err);
-      alert("Error deleting article.");
     }
   };
 
@@ -117,10 +130,78 @@ export default function Admin() {
       setBookings(prev => prev.filter(b => b.id !== id));
     } catch (err) {
       console.error("Failed to cancel booking:", err);
-      alert("Error deleting booking. Please try again.");
     } finally {
       setCancellingId(null);
     }
+  };
+
+  // Availability Actions
+  const handleAddDefaultSlot = async (e) => {
+    e.preventDefault();
+    if (!newDefaultTime) return;
+    try {
+      const res = await axios.post(`${API_URL}/api/availability/default-slots`, { time: newDefaultTime });
+      setSettings(prev => ({ ...prev, default_slots: [...prev.default_slots, res.data] }));
+      setNewDefaultTime('');
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteDefaultSlot = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/api/availability/default-slots/${id}`);
+      setSettings(prev => ({ ...prev, default_slots: prev.default_slots.filter(s => s.id !== id) }));
+    } catch (err) { console.error(err); }
+  };
+
+  const handleBlockDate = async (e) => {
+    e.preventDefault();
+    if (!blockDateInput) return;
+    try {
+      const res = await axios.post(`${API_URL}/api/availability/block-date`, { date: blockDateInput });
+      setSettings(prev => ({ ...prev, blocked_dates: [...prev.blocked_dates, res.data] }));
+      setBlockDateInput('');
+    } catch (err) { console.error(err); }
+  };
+
+  const handleUnblockDate = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/api/availability/block-date/${id}`);
+      setSettings(prev => ({ ...prev, blocked_dates: prev.blocked_dates.filter(b => b.id !== id) }));
+    } catch (err) { console.error(err); }
+  };
+
+  const handleBlockTime = async (e) => {
+    e.preventDefault();
+    if (!blockTimeDate || !blockTimeSlot) return;
+    try {
+      const res = await axios.post(`${API_URL}/api/availability/block-time`, { date: blockTimeDate, time: blockTimeSlot });
+      setSettings(prev => ({ ...prev, blocked_times: [...prev.blocked_times, res.data] }));
+      setBlockTimeDate(''); setBlockTimeSlot('');
+    } catch (err) { console.error(err); }
+  };
+
+  const handleUnblockTime = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/api/availability/block-time/${id}`);
+      setSettings(prev => ({ ...prev, blocked_times: prev.blocked_times.filter(b => b.id !== id) }));
+    } catch (err) { console.error(err); }
+  };
+
+  const handleAddCustomSlot = async (e) => {
+    e.preventDefault();
+    if (!customSlotDate || !customSlotTime) return;
+    try {
+      const res = await axios.post(`${API_URL}/api/availability/custom-slot`, { date: customSlotDate, time: customSlotTime });
+      setSettings(prev => ({ ...prev, custom_slots: [...prev.custom_slots, res.data] }));
+      setCustomSlotDate(''); setCustomSlotTime('');
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteCustomSlot = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/api/availability/custom-slot/${id}`);
+      setSettings(prev => ({ ...prev, custom_slots: prev.custom_slots.filter(c => c.id !== id) }));
+    } catch (err) { console.error(err); }
   };
 
   return (
@@ -132,7 +213,7 @@ export default function Admin() {
         `}
       </style>
 
-      {/* Sidebar Navigation */}
+      {/* Sidebar */}
       <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6">
         <div>
           <div className="flex items-center gap-3 mb-10 pb-6 border-b border-slate-800">
@@ -158,9 +239,7 @@ export default function Admin() {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)} 
                   className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${
-                    isActive 
-                      ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/30' 
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                    isActive ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/30' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -182,16 +261,14 @@ export default function Admin() {
       {/* Main Content */}
       <main className="flex-1 p-8 md:p-12 overflow-y-auto bg-slate-950">
         
-        {/* Dynamic Operational Metrics */}
+        {/* Top Operational Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Active Bookings</p>
               <p className="text-3xl font-bold font-modern-title mt-1 text-white">{bookings.length}</p>
             </div>
-            <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl">
-              <Calendar className="w-6 h-6" />
-            </div>
+            <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl"><Calendar className="w-6 h-6" /></div>
           </div>
 
           <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
@@ -199,23 +276,19 @@ export default function Admin() {
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Published Posts</p>
               <p className="text-3xl font-bold font-modern-title mt-1 text-white">{blogs.length}</p>
             </div>
-            <div className="p-3 bg-red-600/10 text-red-400 rounded-xl">
-              <FileText className="w-6 h-6" />
-            </div>
+            <div className="p-3 bg-red-600/10 text-red-400 rounded-xl"><FileText className="w-6 h-6" /></div>
           </div>
 
           <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Shop Status</p>
-              <p className="text-3xl font-bold font-modern-title mt-1 text-emerald-400">Open</p>
+              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Default Slots</p>
+              <p className="text-3xl font-bold font-modern-title mt-1 text-emerald-400">{settings.default_slots.length}</p>
             </div>
-            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-              <CheckCircle className="w-6 h-6" />
-            </div>
+            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><Clock className="w-6 h-6" /></div>
           </div>
         </div>
 
-        {/* TAB 1: BOOKINGS MANAGEMENT */}
+        {/* TAB 1: BOOKINGS */}
         {activeTab === 'bookings' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
@@ -226,43 +299,25 @@ export default function Admin() {
             </div>
 
             {loading ? (
-              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-400 font-medium">
-                Loading appointments...
-              </div>
+              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-400">Loading appointments...</div>
             ) : bookings.length === 0 ? (
-              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-500 font-medium">
-                No active bookings recorded yet.
-              </div>
+              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-500">No active bookings.</div>
             ) : (
               bookings.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors"
-                >
+                <div key={item.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
                   <div>
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-bold text-white">{item.name}</span>
-                      <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">
-                        Confirmed
-                      </span>
+                      <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">Confirmed</span>
                     </div>
-                    <p className="text-sm font-medium text-slate-400 mt-1">
-                      {item.date} • {item.time} ({item.email})
-                    </p>
+                    <p className="text-sm font-medium text-slate-400 mt-1">{item.date} • {item.time} ({item.email})</p>
                   </div>
 
                   <div className="flex items-center gap-3 w-full md:w-auto">
-                    <a 
-                      href={`mailto:${item.email}`}
-                      className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors"
-                    >
+                    <a href={`mailto:${item.email}`} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
                       <Mail className="w-4 h-4 text-blue-400" /> Email Client
                     </a>
-                    <button 
-                      onClick={() => handleCancelBooking(item.id)}
-                      disabled={cancellingId === item.id}
-                      className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50"
-                    >
+                    <button onClick={() => handleCancelBooking(item.id)} disabled={cancellingId === item.id} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50">
                       <XCircle className="w-4 h-4" /> {cancellingId === item.id ? 'Cancelling...' : 'Cancel'}
                     </button>
                   </div>
@@ -281,33 +336,18 @@ export default function Admin() {
               <form onSubmit={handlePublishBlog} className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
-                  <input 
-                    type="text" 
-                    value={blogTitle}
-                    onChange={(e) => setBlogTitle(e.target.value)}
-                    placeholder="e.g. Master Beard Styling in 5 Steps" 
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors" 
-                  />
+                  <input type="text" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="e.g. Master Beard Styling" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium" />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cover Image (Supabase Storage)</label>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors">
-                      <Upload className="w-4 h-4 text-blue-400" />
-                      Choose File
-                      <input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden" 
-                      />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cover Image</label>
+                  <div className="flex items-center gap-4">
+                    <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center gap-2 text-sm font-semibold text-slate-300">
+                      <Upload className="w-4 h-4 text-blue-400" /> Choose File
+                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
-                    <span className="text-xs text-slate-500 font-medium">
-                      {imageFile ? imageFile.name : 'No image selected'}
-                    </span>
+                    <span className="text-xs text-slate-500">{imageFile ? imageFile.name : 'No image selected'}</span>
                   </div>
-
                   {imagePreview && (
                     <div className="mt-4 relative w-full h-48 rounded-xl overflow-hidden border border-slate-800">
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -317,26 +357,15 @@ export default function Admin() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
-                  <textarea 
-                    rows="6" 
-                    value={blogContent}
-                    onChange={(e) => setBlogContent(e.target.value)}
-                    placeholder="Write your editorial content here..." 
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium transition-colors resize-none"
-                  ></textarea>
+                  <textarea rows="6" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Write your editorial content here..." className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium resize-none"></textarea>
                 </div>
 
-                <button 
-                  type="submit" 
-                  disabled={publishing}
-                  className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50"
-                >
-                  <Send className="w-4 h-4" /> {publishing ? 'Uploading & Publishing...' : 'Publish Insight'}
+                <button type="submit" disabled={publishing} className="bg-blue-700 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
+                  <Send className="w-4 h-4" /> {publishing ? 'Publishing...' : 'Publish Insight'}
                 </button>
               </form>
             </div>
 
-            {/* Published Articles List */}
             <div>
               <h3 className="font-modern-title text-xl font-bold text-white mb-4">Published Articles ({blogs.length})</h3>
               <div className="space-y-4">
@@ -346,21 +375,14 @@ export default function Admin() {
                       {blog.image_url ? (
                         <img src={blog.image_url} alt={blog.title} className="w-14 h-14 rounded-xl object-cover border border-slate-800" />
                       ) : (
-                        <div className="w-14 h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600">
-                          <ImageIcon className="w-6 h-6" />
-                        </div>
+                        <div className="w-14 h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600"><ImageIcon className="w-6 h-6" /></div>
                       )}
                       <div>
                         <h4 className="font-bold text-white text-base">{blog.title}</h4>
                         <p className="text-xs text-slate-400 line-clamp-1">{blog.content}</p>
                       </div>
                     </div>
-
-                    <button 
-                      onClick={() => handleDeleteBlog(blog.id)}
-                      className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20 transition-colors"
-                      title="Delete Article"
-                    >
+                    <button onClick={() => handleDeleteBlog(blog.id)} className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -370,25 +392,149 @@ export default function Admin() {
           </div>
         )}
 
-        {/* TAB 3: AVAILABILITY & SCHEDULE */}
+        {/* TAB 3: AVAILABILITY SETTINGS */}
         {activeTab === 'schedule' && (
-          <div className="space-y-6 max-w-2xl">
-            <h2 className="font-modern-title text-3xl font-bold text-white mb-6">Availability Settings</h2>
+          <div className="space-y-8 max-w-4xl">
+            <div>
+              <h2 className="font-modern-title text-3xl font-bold text-white mb-2">Schedule & Availability Controls</h2>
+              <p className="text-slate-400 text-sm">Configure standard daily hours, ban entire days or specific times, and create custom single-day slots.</p>
+            </div>
+
+            {/* SECTION 1: DEFAULT SLOTS */}
             <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
-              <p className="text-slate-400 text-sm font-medium">Block specific dates for holidays or staff training.</p>
-              <div className="flex flex-col sm:flex-row gap-4 items-end">
-                <div className="flex-1 w-full">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Exception Date</label>
-                  <input 
-                    type="date" 
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-blue-700 font-medium" 
-                  />
-                </div>
-                <button className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-                  <ShieldAlert className="w-4 h-4" /> Block Date
+              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-blue-400" /> Default Recurring Slots
+              </h3>
+              
+              <form onSubmit={handleAddDefaultSlot} className="flex gap-4">
+                <input 
+                  type="text" 
+                  placeholder="e.g. 09:00 AM, 02:30 PM" 
+                  value={newDefaultTime} 
+                  onChange={e => setNewDefaultTime(e.target.value)} 
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-blue-700 text-sm" 
+                />
+                <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Add Default
                 </button>
+              </form>
+
+              <div className="flex flex-wrap gap-3">
+                {settings.default_slots.map(s => (
+                  <div key={s.id} className="bg-slate-950 border border-slate-800 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-slate-200">
+                    <span>{s.time}</span>
+                    <button onClick={() => handleDeleteDefaultSlot(s.id)} className="text-slate-500 hover:text-red-400 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* SECTION 2: BLOCK ENTIRE DATE */}
+            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                <CalendarX className="w-5 h-5 text-red-400" /> Block Entire Days (Holidays / Days Off)
+              </h3>
+
+              <form onSubmit={handleBlockDate} className="flex gap-4">
+                <input 
+                  type="date" 
+                  value={blockDateInput} 
+                  onChange={e => setBlockDateInput(e.target.value)} 
+                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-red-600 text-sm" 
+                />
+                <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4" /> Ban Date
+                </button>
+              </form>
+
+              <div className="flex flex-wrap gap-3">
+                {settings.blocked_dates.map(b => (
+                  <div key={b.id} className="bg-red-950/40 border border-red-800/50 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-red-200">
+                    <span>{b.date}</span>
+                    <button onClick={() => handleUnblockDate(b.id)} className="text-red-400 hover:text-white transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 3: BLOCK SPECIFIC TIME ON SPECIFIC DAY */}
+            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                <Ban className="w-5 h-5 text-amber-400" /> Ban Specific Time Slot on Specific Day
+              </h3>
+
+              <form onSubmit={handleBlockTime} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <input 
+                  type="date" 
+                  value={blockTimeDate} 
+                  onChange={e => setBlockTimeDate(e.target.value)} 
+                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-amber-500 text-sm" 
+                />
+                <input 
+                  type="text" 
+                  placeholder="e.g. 01:00 PM" 
+                  value={blockTimeSlot} 
+                  onChange={e => setBlockTimeSlot(e.target.value)} 
+                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-amber-500 text-sm" 
+                />
+                <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                  <Ban className="w-4 h-4" /> Block Slot
+                </button>
+              </form>
+
+              <div className="flex flex-wrap gap-3">
+                {settings.blocked_times.map(bt => (
+                  <div key={bt.id} className="bg-amber-950/30 border border-amber-800/40 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-amber-200">
+                    <span>{bt.date} @ {bt.time}</span>
+                    <button onClick={() => handleUnblockTime(bt.id)} className="text-amber-400 hover:text-white transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 4: SINGLE-DAY CUSTOM EXTRA SLOTS */}
+            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 space-y-6">
+              <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                <PlusCircle className="w-5 h-5 text-emerald-400" /> Add Custom Slot for Single Day Only
+              </h3>
+
+              <form onSubmit={handleAddCustomSlot} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <input 
+                  type="date" 
+                  value={customSlotDate} 
+                  onChange={e => setCustomSlotDate(e.target.value)} 
+                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-emerald-500 text-sm" 
+                />
+                <input 
+                  type="text" 
+                  placeholder="e.g. 06:30 PM" 
+                  value={customSlotTime} 
+                  onChange={e => setCustomSlotTime(e.target.value)} 
+                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-emerald-500 text-sm" 
+                />
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2">
+                  <PlusCircle className="w-4 h-4" /> Add Custom
+                </button>
+              </form>
+
+              <div className="flex flex-wrap gap-3">
+                {settings.custom_slots.map(cs => (
+                  <div key={cs.id} className="bg-emerald-950/30 border border-emerald-800/40 px-4 py-2 rounded-xl flex items-center gap-3 text-sm font-semibold text-emerald-200">
+                    <span>{cs.date} @ {cs.time}</span>
+                    <button onClick={() => handleDeleteCustomSlot(cs.id)} className="text-emerald-400 hover:text-white transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         )}
       </main>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, User, Mail, CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar as CalendarIcon, Clock, User, Mail, CheckCircle2, ChevronRight, ArrowLeft, AlertCircle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 
 const BackgroundPattern = () => (
@@ -23,26 +23,35 @@ export default function Booking() {
   const [time, setTime] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [availableTimes, setAvailableTimes] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const availableTimes = ['09:00 AM', '10:30 AM', '01:00 PM', '03:00 PM', '04:30 PM'];
   const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
+
+  useEffect(() => {
+    if (!date) return;
+    setLoadingSlots(true);
+    axios.get(`${API_URL}/api/availability/slots?date=${date}`)
+      .then(res => {
+        setAvailableTimes(res.data);
+      })
+      .catch(err => {
+        console.error("Error fetching available slots:", err);
+        setAvailableTimes([]);
+      })
+      .finally(() => setLoadingSlots(false));
+  }, [date, API_URL]);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
-      // Send payload as JSON body to match backend Pydantic schema
-      await axios.post(`${API_URL}/api/bookings`, {
-        name,
-        email,
-        date,
-        time
-      });
+      await axios.post(`${API_URL}/api/bookings`, { name, email, date, time });
       alert(`Success! Your appointment for ${date} at ${time} is pending confirmation.`);
       setStep(1); setDate(''); setTime(''); setName(''); setEmail('');
     } catch (error) {
       console.error("Booking error:", error);
-      alert("There was an issue saving your booking. Please try again.");
+      alert("Selected slot is no longer available or an error occurred.");
     } finally {
       setIsSubmitting(false);
     }
@@ -60,7 +69,6 @@ export default function Booking() {
         `}
       </style>
 
-      {/* Background Grid & Decorative Straps */}
       <BackgroundPattern />
       <div className="absolute top-0 right-12 md:right-28 bottom-0 w-24 md:w-36 flex justify-end gap-4 pointer-events-none z-0">
         <div className="w-8 md:w-12 h-full bg-red-600 animate-strap-fast shadow-xl"></div>
@@ -70,7 +78,6 @@ export default function Booking() {
       <main className="relative z-10 w-full max-w-2xl">
         <div className="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/90 shadow-2xl p-8 md:p-12 overflow-hidden">
           
-          {/* Header */}
           <div className="mb-8 text-center sm:text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-red-600 mb-2 block">Precision Appointment</span>
             <h1 className="font-modern-title text-4xl sm:text-5xl font-bold tracking-tight text-slate-900">
@@ -78,7 +85,6 @@ export default function Booking() {
             </h1>
           </div>
 
-          {/* Stepper Progress Bar */}
           <div className="flex items-center justify-between mb-10 pb-6 border-b border-slate-100">
             {[
               { num: 1, label: 'Date' },
@@ -129,22 +135,35 @@ export default function Booking() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {availableTimes.map(t => (
-                  <button 
-                    key={t}
-                    onClick={() => { setTime(t); setStep(3); }}
-                    className="p-4 rounded-2xl border border-slate-200 font-bold text-sm text-slate-800 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95 shadow-sm"
-                  >
-                    <Clock className="w-4 h-4 text-slate-400" />
-                    {t}
-                  </button>
-                ))}
-              </div>
+              {loadingSlots ? (
+                <div className="py-12 flex flex-col items-center justify-center text-slate-500">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-700 mb-2" />
+                  <p className="text-sm font-semibold">Checking calendar availability...</p>
+                </div>
+              ) : availableTimes.length === 0 ? (
+                <div className="p-8 bg-red-50/50 border border-red-200 rounded-2xl text-center text-red-700">
+                  <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-600" />
+                  <p className="font-bold text-base">No times available for this date.</p>
+                  <p className="text-xs text-red-600 mt-1 font-medium">The barber is off or all slots are booked. Please pick another date.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {availableTimes.map(t => (
+                    <button 
+                      key={t}
+                      onClick={() => { setTime(t); setStep(3); }}
+                      className="p-4 rounded-2xl border border-slate-200 font-bold text-sm text-slate-800 hover:border-blue-700 hover:bg-blue-50/50 hover:text-blue-700 transition-all flex items-center justify-center gap-2 active:scale-95 shadow-sm"
+                    >
+                      <Clock className="w-4 h-4 text-slate-400" />
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Step 3: Client Details & Confirmation */}
+          {/* Step 3: Details */}
           {step === 3 && (
             <div className="space-y-6">
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 flex items-center justify-between">
@@ -190,10 +209,7 @@ export default function Booking() {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <button 
-                  onClick={() => setStep(2)} 
-                  className="flex-1 bg-slate-100 text-slate-700 font-bold py-4 rounded-full hover:bg-slate-200 transition-all text-sm"
-                >
+                <button onClick={() => setStep(2)} className="flex-1 bg-slate-100 text-slate-700 font-bold py-4 rounded-full hover:bg-slate-200 text-sm">
                   Back
                 </button>
                 <button 
