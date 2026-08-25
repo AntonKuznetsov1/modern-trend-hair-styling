@@ -401,26 +401,28 @@ export default function Admin() {
             ) : bookings.length === 0 ? (
               <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-500">No active bookings.</div>
             ) : (
-              bookings.map((item) => (
-                <div key={item.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg font-bold text-white">{item.name}</span>
-                      <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">Confirmed</span>
+              [...bookings]
+                .sort((a, b) => b.id - a.id)
+                .map((item) => (
+                  <div key={item.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg font-bold text-white">{item.name}</span>
+                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">Confirmed</span>
+                      </div>
+                      <p className="text-sm font-medium text-slate-400 mt-1">{item.date} • {item.time} ({item.email})</p>
                     </div>
-                    <p className="text-sm font-medium text-slate-400 mt-1">{item.date} • {item.time} ({item.email})</p>
-                  </div>
 
-                  <div className="flex items-center gap-3 w-full md:w-auto">
-                    <a href={`mailto:${item.email}`} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
-                      <Mail className="w-4 h-4 text-blue-400" /> Email Client
-                    </a>
-                    <button onClick={() => handleCancelBooking(item.id)} disabled={cancellingId === item.id} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50">
-                      <XCircle className="w-4 h-4" /> {cancellingId === item.id ? 'Cancelling...' : 'Cancel'}
-                    </button>
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                      <a href={`mailto:${item.email}`} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                        <Mail className="w-4 h-4 text-blue-400" /> Email Client
+                      </a>
+                      <button onClick={() => handleCancelBooking(item.id)} disabled={cancellingId === item.id} className="flex-1 md:flex-initial flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-sm transition-colors disabled:opacity-50">
+                        <XCircle className="w-4 h-4" /> {cancellingId === item.id ? 'Cancelling...' : 'Cancel'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))
             )}
           </div>
         )}
