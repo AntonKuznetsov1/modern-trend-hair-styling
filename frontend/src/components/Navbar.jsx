@@ -8,7 +8,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
-  // Track scroll position for transparent vs. frosted glass background
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -17,13 +16,11 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu and unlock body scroll on route change
   useEffect(() => {
     setIsOpen(false);
     document.body.style.overflow = 'unset';
   }, [location]);
 
-  // Lock background scrolling when mobile menu is open
   const toggleMenu = () => {
     const nextState = !isOpen;
     setIsOpen(nextState);
@@ -52,10 +49,11 @@ export default function Navbar() {
             : 'bg-gradient-to-b from-white/90 via-white/40 to-transparent py-4'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between">
+        {/* Added relative positioning to parent container */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between min-h-[44px]">
           
           {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-3 group z-50">
+          <Link to="/" className="flex items-center group z-50">
             <div className="relative flex items-center justify-center p-1.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/60 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
               <img 
                 src={logo} 
@@ -65,8 +63,8 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Navigation pill */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-200/80 shadow-sm">
+          {/* Desktop Navigation pill - Centered via absolute positioning */}
+          <nav className="hidden md:flex items-center gap-1 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-200/80 shadow-sm md:absolute md:left-1/2 md:-translate-x-1/2 z-40">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -83,7 +81,7 @@ export default function Navbar() {
           </nav>
 
           {/* Action Callouts */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4 z-50">
             <a 
               href="tel:+15064728199" 
               className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors px-3 py-2 min-h-[44px]"
@@ -113,8 +111,6 @@ export default function Navbar() {
         {/* Mobile Fullscreen Overlay & Menu */}
         {isOpen && (
           <div className="md:hidden fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-md pt-24 px-4 sm:px-6 pb-8 flex flex-col justify-between animate-in fade-in duration-200">
-            
-            {/* Nav Card */}
             <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-2xl space-y-3">
               <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 block px-2 mb-1">Navigation</span>
               <nav className="flex flex-col gap-1.5">
@@ -146,7 +142,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Tap outside hint footer */}
             <div className="text-center text-xs font-bold text-white/80 uppercase tracking-widest py-2">
               Modern Trend Hair Styling
             </div>
