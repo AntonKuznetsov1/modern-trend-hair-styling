@@ -5,7 +5,6 @@ import Footer from './components/Footer';
 
 import Landing from './pages/Landing';
 import Blog from './pages/Blog';
-import Booking from './pages/Booking';
 import Admin from './pages/Admin';
 
 function ScrollToHash() {
@@ -44,7 +43,6 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/blog" element={<Blog />} />
-          <Route path="/booking" element={<Booking />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>

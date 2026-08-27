@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
 
-from app.models.models import Base, Booking, BlogPost, DefaultSlot, BlockedDate, BlockedTime, CustomSlot
+from app.models.models import Base, BlogPost, DefaultSlot, BlockedDate, BlockedTime, CustomSlot
 from app.core.database import get_db, engine
 
 # Automatically create database tables if they do not exist
@@ -35,12 +35,6 @@ class BlogCreate(BaseModel):
     title: str
     content: str
     image_url: Optional[str] = None
-
-class BookingCreate(BaseModel):
-    name: str
-    email: str
-    date: str
-    time: str
 
 class SlotCreate(BaseModel):
     time: str
@@ -93,43 +87,6 @@ def like_blog(post_id: int, db: Session = Depends(get_db)):
     return {"message": "Liked"}
 
 
-# --- Booking Endpoints ---
-@app.get("/api/bookings")
-def get_bookings(db: Session = Depends(get_db)):
-    return db.query(Booking).order_by(Booking.id.desc()).all()
-
-@app.post("/api/bookings")
-def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
-    existing = db.query(Booking).filter(
-        Booking.date == booking.date, 
-        Booking.time == booking.time,
-        Booking.status != "cancelled"
-    ).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Time slot already booked")
-
-    new_booking = Booking(
-        name=booking.name,
-        email=booking.email,
-        date=booking.date,
-        time=booking.time,
-        status="confirmed"
-    )
-    db.add(new_booking)
-    db.commit()
-    db.refresh(new_booking)
-    return new_booking
-
-@app.delete("/api/bookings/{booking_id}")
-def delete_booking(booking_id: int, db: Session = Depends(get_db)):
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    db.delete(booking)
-    db.commit()
-    return {"message": "Booking cancelled"}
-
-
 # --- Availability Endpoints ---
 @app.get("/api/availability/slots")
 def get_available_slots(date: str = Query(...), db: Session = Depends(get_db)):
@@ -145,13 +102,7 @@ def get_available_slots(date: str = Query(...), db: Session = Depends(get_db)):
     blocked_times = set([b.time for b in db.query(BlockedTime).filter(BlockedTime.date == date).all()])
     available = all_times - blocked_times
 
-    booked_times = set([b.time for b in db.query(Booking).filter(
-        Booking.date == date, 
-        Booking.status != "cancelled"
-    ).all()])
-    
-    final_slots = list(available - booked_times)
-    return sorted(final_slots)
+    return sorted(list(available))
 
 @app.get("/api/availability/settings")
 def get_availability_settings(db: Session = Depends(get_db)):

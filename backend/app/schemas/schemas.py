@@ -1,11 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
-
-class BookingCreate(BaseModel):
-    name: str
-    email: EmailStr
-    date: str
-    time: str
 
 class BlogCreate(BaseModel):
     title: str

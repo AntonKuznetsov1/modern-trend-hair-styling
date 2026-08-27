@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Scissors, Clock, Send, ShieldCheck, Sparkles, Award, Flame } from 'lucide-react';
 
 // COMPONENT: Solid architectural grid
@@ -95,9 +94,9 @@ export default function Landing() {
           </p>
           
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-12">
-            <Link to="/booking" className="w-full sm:w-auto text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 sm:py-4 px-8 sm:px-10 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg min-h-[44px] flex items-center justify-center">
-              Book Appointment
-            </Link>
+            <a href="#contact" className="w-full sm:w-auto text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 sm:py-4 px-8 sm:px-10 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg min-h-[44px] flex items-center justify-center">
+              Contact Us
+            </a>
             <a href="#services" className="w-full sm:w-auto text-center bg-white/90 backdrop-blur-md border-2 border-slate-200 hover:border-slate-900 text-slate-900 font-bold py-3.5 sm:py-4 px-8 sm:px-10 rounded-full transition-all min-h-[44px] flex items-center justify-center">
               Explore Services
             </a>

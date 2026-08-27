@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, Calendar, ChevronRight } from 'lucide-react';
+import { Menu, X, Phone, ChevronRight, BookOpen } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 export default function Navbar() {
@@ -33,7 +33,6 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Booking', path: '/booking' },
     { name: 'Blog', path: '/blog' },
     { name: 'Contact', path: '/#contact' },
   ];
@@ -91,18 +90,11 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-4">
             <a 
               href="tel:+15064728199" 
-              className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors px-3 py-2 min-h-[44px] whitespace-nowrap"
-            >
-              <Phone className="w-4 h-4 text-blue-700" />
-              (506) 472-8199
-            </a>
-            <Link
-              to="/booking"
               className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2 min-h-[44px] whitespace-nowrap"
             >
-              <Calendar className="w-4 h-4" />
-              Book Now
-            </Link>
+              <Phone className="w-4 h-4" />
+              (506) 472-8199
+            </a>
           </div>
 
           <button
@@ -141,11 +133,11 @@ export default function Navbar() {
 
             <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
               <Link
-                to="/booking"
+                to="/blog"
                 onClick={toggleMenu}
                 className="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider py-3.5 sm:py-4 rounded-2xl text-center shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-all min-h-[44px]"
               >
-                <Calendar className="w-4 h-4" /> Book Appointment
+                <BookOpen className="w-4 h-4" /> Check Blog
               </Link>
             </div>
           </div>

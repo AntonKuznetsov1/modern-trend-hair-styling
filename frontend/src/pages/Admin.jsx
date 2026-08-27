@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  Calendar, FileText, Clock, Mail, XCircle, Send, ShieldAlert, 
-  RefreshCw, Upload, Image as ImageIcon, Trash2, Plus, CalendarX, 
-  PlusCircle, Ban, Lock, LogOut, Menu, X 
+  FileText, Clock, ShieldAlert, RefreshCw, Upload, Image as ImageIcon, 
+  Trash2, Plus, CalendarX, PlusCircle, Ban, Lock, LogOut, Menu, X, Send 
 } from 'lucide-react';
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
@@ -13,12 +12,10 @@ export default function Admin() {
   const [authError, setAuthError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('bookings');
+  const [activeTab, setActiveTab] = useState('blog');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [bookings, setBookings] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cancellingId, setCancellingId] = useState(null);
 
   // Blog Form State
   const [blogTitle, setBlogTitle] = useState('');
@@ -77,12 +74,10 @@ export default function Admin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, blogsRes, settingsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/bookings`),
+      const [blogsRes, settingsRes] = await Promise.all([
         axios.get(`${API_URL}/api/blogs`),
         axios.get(`${API_URL}/api/availability/settings`)
       ]);
-      setBookings(bookingsRes.data);
       setBlogs(blogsRes.data);
       setSettings(settingsRes.data);
     } catch (err) {
@@ -161,19 +156,6 @@ export default function Admin() {
       setBlogs(blogs.filter(b => b.id !== id));
     } catch (err) {
       console.error("Failed to delete blog:", err);
-    }
-  };
-
-  const handleCancelBooking = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
-    setCancellingId(id);
-    try {
-      await axios.delete(`${API_URL}/api/bookings/${id}`);
-      setBookings(prev => prev.filter(b => b.id !== id));
-    } catch (err) {
-      console.error("Failed to cancel booking:", err);
-    } finally {
-      setCancellingId(null);
     }
   };
 
@@ -367,7 +349,6 @@ export default function Admin() {
 
           <nav className="space-y-2">
             {[
-              { id: 'bookings', label: 'Bookings', icon: Calendar },
               { id: 'blog', label: 'Blog Manager', icon: FileText },
               { id: 'schedule', label: 'Availability', icon: Clock }
             ].map(item => {
@@ -413,15 +394,7 @@ export default function Admin() {
       <main className="flex-1 p-4 sm:p-6 md:p-12 overflow-y-auto bg-slate-950 w-full max-w-7xl mx-auto">
         
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
-          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Active Bookings</p>
-              <p className="text-2xl sm:text-3xl font-bold font-modern-title mt-1 text-white">{bookings.length}</p>
-            </div>
-            <div className="p-3 bg-blue-700/10 text-blue-400 rounded-xl"><Calendar className="w-5 h-5 sm:w-6 sm:h-6" /></div>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
           <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Published Posts</p>
@@ -430,7 +403,7 @@ export default function Admin() {
             <div className="p-3 bg-red-600/10 text-red-400 rounded-xl"><FileText className="w-5 h-5 sm:w-6 sm:h-6" /></div>
           </div>
 
-          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between sm:col-span-2 lg:col-span-1">
+          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Default Slots</p>
               <p className="text-2xl sm:text-3xl font-bold font-modern-title mt-1 text-emerald-400">{settings.default_slots.length}</p>
@@ -439,48 +412,7 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* TAB 1: BOOKINGS */}
-        {activeTab === 'bookings' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-              <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white">Manage Bookings</h2>
-              <span className="self-start sm:self-auto text-xs font-bold uppercase tracking-wider px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-full">
-                Realtime Feed ({bookings.length})
-              </span>
-            </div>
-
-            {loading ? (
-              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-400">Loading appointments...</div>
-            ) : bookings.length === 0 ? (
-              <div className="p-8 bg-slate-900 rounded-2xl border border-slate-800 text-center text-slate-500">No active bookings.</div>
-            ) : (
-              [...bookings]
-                .sort((a, b) => b.id - a.id)
-                .map((item) => (
-                  <div key={item.id} className="bg-slate-900 rounded-2xl border border-slate-800 p-4 sm:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-slate-700 transition-colors">
-                    <div className="space-y-1 w-full md:w-auto">
-                      <div className="flex items-center justify-between sm:justify-start gap-3">
-                        <span className="text-base sm:text-lg font-bold text-white">{item.name}</span>
-                        <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 bg-blue-500/10 text-blue-400 rounded-md border border-blue-500/20">Confirmed</span>
-                      </div>
-                      <p className="text-xs sm:text-sm font-medium text-slate-400 break-all sm:break-normal">{item.date} • {item.time} ({item.email})</p>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto pt-2 md:pt-0 border-t border-slate-800/80 md:border-none">
-                      <a href={`mailto:${item.email}`} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors min-h-[44px]">
-                        <Mail className="w-4 h-4 text-blue-400" /> Email Client
-                      </a>
-                      <button onClick={() => handleCancelBooking(item.id)} disabled={cancellingId === item.id} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-colors disabled:opacity-50 min-h-[44px]">
-                        <XCircle className="w-4 h-4" /> {cancellingId === item.id ? 'Cancelling...' : 'Cancel'}
-                      </button>
-                    </div>
-                  </div>
-                ))
-            )}
-          </div>
-        )}
-
-        {/* TAB 2: BLOG MANAGER */}
+        {/* TAB 1: BLOG MANAGER */}
         {activeTab === 'blog' && (
           <div className="space-y-8 sm:space-y-10 max-w-4xl">
             <div>
@@ -545,7 +477,7 @@ export default function Admin() {
           </div>
         )}
 
-        {/* TAB 3: AVAILABILITY SETTINGS */}
+        {/* TAB 2: AVAILABILITY SETTINGS */}
         {activeTab === 'schedule' && (
           <div className="space-y-6 sm:space-y-8 max-w-4xl">
             <div>
