@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Scissors, Clock, Send, ShieldCheck } from 'lucide-react';
+import { Mail, Phone, MapPin, Scissors, Clock, Send, ShieldCheck, Sparkles, Award, Flame } from 'lucide-react';
 
-// COMPONENT: Solid architectural grid[cite: 2]
+// COMPONENT: Solid architectural grid
 const BackgroundPattern = () => {
   return (
     <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-white">
@@ -20,10 +20,37 @@ const BackgroundPattern = () => {
 };
 
 export default function Landing() {
+  const specialties = [
+    { 
+      title: "Custom Men's Styling", 
+      desc: "Tailored haircutting, texturizing, and modern finishing designed to fit your unique aesthetic.", 
+      border: "border-blue-700",
+      icon: Scissors
+    },
+    { 
+      title: "Women's Haircuts", 
+      desc: "Precision haircuts, custom layering, trims, and professional styling for women of all hair lengths.", 
+      border: "border-purple-600",
+      icon: Sparkles
+    },
+    { 
+      title: "Beard Maintenance", 
+      desc: "Detailed shaping, sharp razor edging, and conditioning treatments for clean facial hair.", 
+      border: "border-red-600",
+      icon: Flame
+    },
+    { 
+      title: "Military & Classic Cuts", 
+      desc: "Strict regulation-compliant fades, flat tops, and classic low-maintenance haircuts.", 
+      border: "border-slate-900",
+      icon: Award
+    }
+  ];
+
   return (
     <div className="relative min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-700 selection:text-white">
       
-      {/* Dynamic Font & Animation Styles[cite: 2] */}
+      {/* Dynamic Font & Animation Styles */}
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
@@ -50,13 +77,13 @@ export default function Landing() {
       <div className="relative min-h-screen overflow-hidden flex flex-col justify-end">
         <BackgroundPattern />
 
-        {/* RIGHT SIDE: Animated Vertical Straps[cite: 2] */}
+        {/* RIGHT SIDE: Animated Vertical Straps */}
         <div className="absolute top-0 right-4 sm:right-8 md:right-32 bottom-0 w-20 sm:w-32 md:w-48 flex justify-end gap-2 sm:gap-4 md:gap-8 pointer-events-none z-0 opacity-40 sm:opacity-100">
           <div className="w-8 sm:w-12 md:w-16 h-full bg-red-600 animate-strap-fast shadow-2xl"></div>
           <div className="w-8 sm:w-12 md:w-16 h-full bg-blue-700 animate-strap-slow shadow-2xl"></div>
         </div>
 
-        {/* BOTTOM LEFT: Main Hero Contents[cite: 2] */}
+        {/* BOTTOM LEFT: Main Hero Contents */}
         <div className="relative z-10 p-5 sm:p-8 md:p-16 w-full md:w-3/4 lg:w-2/3 pt-20 sm:pt-24 pb-12 sm:pb-16">
           <h1 className="font-modern-title text-4xl sm:text-6xl md:text-8xl font-medium mb-4 sm:mb-5 tracking-tight leading-[0.98] sm:leading-[0.95]">
             Modern <span className="text-red-600">Trend</span> <br />
@@ -64,7 +91,7 @@ export default function Landing() {
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl text-slate-700 mb-8 sm:mb-10 leading-relaxed max-w-lg font-medium bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-100 shadow-sm">
-            Delivering distinguished grooming services with a focus on custom men's styling, sharp beard maintenance, and traditional military standards. Comprehensive cuts available for all clients.
+            Delivering distinguished hair styling and grooming services — specializing in custom men's cuts, women's haircuts, sharp beard maintenance, and classic military standards.
           </p>
           
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-12">
@@ -91,27 +118,30 @@ export default function Landing() {
 
       {/* SECTION 1: SERVICES OVERVIEW */}
       <section id="services" className="relative z-10 py-16 sm:py-24 px-5 sm:px-8 md:px-16 border-t border-slate-200/80 bg-slate-50/50">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-4">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-red-600 mb-2 block">Craftsmanship</span>
               <h2 className="font-modern-title text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900">Our Specialties</h2>
             </div>
-            <p className="text-slate-600 max-w-md font-medium text-sm sm:text-base">Precision cutting tailored to individual facial features, lifestyle preferences, and professional standards.</p>
+            <p className="text-slate-600 max-w-md font-medium text-sm sm:text-base">Precision cutting for men and women tailored to individual facial features, personal style, and professional standards.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              { title: "Custom Men's Styling", desc: "Tailored haircutting, texturizing, and modern finishing designed to fit your unique aesthetic.", border: "border-blue-700" },
-              { title: "Beard Maintenance", desc: "Detailed shaping, sharp razor edging, and conditioning treatments for clean facial hair.", border: "border-red-600" },
-              { title: "Military & Classic Cuts", desc: "Strict regulation-compliant fades, flat tops, and classic low-maintenance haircuts.", border: "border-slate-900" }
-            ].map((service, idx) => (
-              <div key={idx} className={`bg-white p-6 sm:p-8 rounded-2xl border-l-4 ${service.border} border-y border-r border-slate-200/80 shadow-sm hover:shadow-md transition-all`}>
-                <Scissors className="w-7 h-7 sm:w-8 sm:h-8 text-slate-800 mb-4 sm:mb-6" />
-                <h3 className="font-modern-title text-lg sm:text-xl font-bold mb-2 sm:mb-3">{service.title}</h3>
-                <p className="text-slate-600 leading-relaxed text-sm font-medium">{service.desc}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {specialties.map((service, idx) => {
+              const IconComponent = service.icon;
+              return (
+                <div key={idx} className={`bg-white p-6 sm:p-8 rounded-2xl border-l-4 ${service.border} border-y border-r border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between`}>
+                  <div>
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-4 sm:mb-6">
+                      <IconComponent className="w-6 h-6 text-slate-800" />
+                    </div>
+                    <h3 className="font-modern-title text-lg sm:text-xl font-bold mb-2 sm:mb-3">{service.title}</h3>
+                    <p className="text-slate-600 leading-relaxed text-sm font-medium">{service.desc}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -130,7 +160,7 @@ export default function Landing() {
             <ShieldCheck className="w-6 h-6 text-red-600 shrink-0 mt-1" />
             <div>
               <h4 className="font-bold text-slate-900 mb-1 text-sm sm:text-base">Welcoming Environment</h4>
-              <p className="text-xs sm:text-sm text-slate-600">While focusing heavily on men's grooming, ladies' haircuts are always welcome.</p>
+              <p className="text-xs sm:text-sm text-slate-600">Full barbershop and hair styling services for men, women, and children.</p>
             </div>
           </div>
           <div className="flex items-start gap-4">
