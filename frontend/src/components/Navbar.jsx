@@ -63,9 +63,6 @@ export default function Navbar() {
                 className="h-9 sm:h-11 w-auto object-contain filter drop-shadow-sm" 
               />
             </div>
-            <span className="font-modern-title font-extrabold text-lg sm:text-xl md:text-2xl tracking-tight text-slate-900">
-              Modern <span className="text-red-600">Trend</span>
-            </span>
           </Link>
 
           {/* Desktop Navigation pill */}
