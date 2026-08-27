@@ -48,10 +48,10 @@ export default function Navbar() {
           : 'bg-gradient-to-b from-white/90 via-white/40 to-transparent py-4'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between min-h-[44px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between gap-4 min-h-[44px]">
         
-        {/* Left: Logo Only */}
-        <Link to="/" className="flex items-center group z-50">
+        {/* Brand Logo with Text */}
+        <Link to="/" className="flex items-center gap-3 group z-50 shrink-0">
           <div className="relative flex items-center justify-center p-1.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/60 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
             <img 
               src={logo} 
@@ -59,9 +59,17 @@ export default function Navbar() {
               className="h-9 sm:h-11 w-auto object-contain filter drop-shadow-sm" 
             />
           </div>
+          <div className="flex flex-col justify-center border-l border-slate-200/80 pl-3">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-slate-900 leading-none">
+              Hair Styling
+            </span>
+            <span className="text-[9px] font-bold uppercase tracking-widest text-red-600 mt-1 leading-none">
+              Barber & Salon
+            </span>
+          </div>
         </Link>
 
-        {/* Center: Desktop Navigation */}
+        {/* Center Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-200/80 shadow-sm">
           {navLinks.map((link) => (
             <Link
@@ -78,7 +86,7 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Right: Actions */}
+        {/* Action Callouts & Mobile Toggle */}
         <div className="flex items-center gap-4">
           <div className="hidden lg:flex items-center gap-4">
             <a 
