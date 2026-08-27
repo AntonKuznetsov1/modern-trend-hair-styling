@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, ChevronRight, BookOpen } from 'lucide-react';
+import { Menu, X, Phone, ChevronRight, BookOpen, FileText } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 export default function Navbar() {
