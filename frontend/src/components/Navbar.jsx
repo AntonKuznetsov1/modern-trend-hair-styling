@@ -49,27 +49,28 @@ export default function Navbar() {
             : 'bg-gradient-to-b from-white/90 via-white/40 to-transparent py-4'
         }`}
       >
-        {/* Added relative positioning to parent container */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between min-h-[44px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between gap-4 min-h-[44px]">
           
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center group z-50">
-            <div className="relative flex items-center justify-center p-1.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/60 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
-              <img 
-                src={logo} 
-                alt="Modern Trend Hair Styling" 
-                className="h-9 sm:h-11 w-auto object-contain filter drop-shadow-sm" 
-              />
-            </div>
-          </Link>
+          {/* Left Column: Brand Logo */}
+          <div className="flex-1 flex items-center justify-start">
+            <Link to="/" className="flex items-center group z-50">
+              <div className="relative flex items-center justify-center p-1.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/60 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
+                <img 
+                  src={logo} 
+                  alt="Modern Trend Hair Styling" 
+                  className="h-9 sm:h-11 w-auto object-contain filter drop-shadow-sm" 
+                />
+              </div>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation pill - Centered via absolute positioning */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-slate-200/80 shadow-sm md:absolute md:left-1/2 md:-translate-x-1/2 z-40">
+          {/* Center Column: Navigation pill */}
+          <nav className="hidden md:flex items-center gap-1 bg-white/80 backdrop-blur-md px-3 sm:px-4 py-1.5 rounded-full border border-slate-200/80 shadow-sm shrink-0">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
+                className={`px-3 sm:px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
                   isActive(link.path)
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
@@ -80,32 +81,36 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Action Callouts */}
-          <div className="hidden lg:flex items-center gap-4 z-50">
-            <a 
-              href="tel:+15064728199" 
-              className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors px-3 py-2 min-h-[44px]"
+          {/* Right Column: Actions & Mobile Toggle */}
+          <div className="flex-1 flex items-center justify-end gap-4">
+            {/* Desktop Action Callouts */}
+            <div className="hidden lg:flex items-center gap-4">
+              <a 
+                href="tel:+15064728199" 
+                className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors px-3 py-2 min-h-[44px] whitespace-nowrap"
+              >
+                <Phone className="w-4 h-4 text-blue-700" />
+                (506) 472-8199
+              </a>
+              <Link
+                to="/booking"
+                className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2 min-h-[44px] whitespace-nowrap"
+              >
+                <Calendar className="w-4 h-4" />
+                Book Now
+              </Link>
+            </div>
+
+            {/* Mobile Toggle Button */}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden z-50 p-2.5 rounded-xl bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 shadow-sm hover:bg-slate-50 active:scale-95 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Toggle Menu"
             >
-              <Phone className="w-4 h-4 text-blue-700" />
-              (506) 472-8199
-            </a>
-            <Link
-              to="/booking"
-              className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2 min-h-[44px]"
-            >
-              <Calendar className="w-4 h-4" />
-              Book Now
-            </Link>
+              {isOpen ? <X className="w-6 h-6 text-red-600" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
 
-          {/* Mobile Toggle Button */}
-          <button
-            onClick={toggleMenu}
-            className="md:hidden z-50 p-2.5 rounded-xl bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 shadow-sm hover:bg-slate-50 active:scale-95 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Toggle Menu"
-          >
-            {isOpen ? <X className="w-6 h-6 text-red-600" /> : <Menu className="w-6 h-6" />}
-          </button>
         </div>
 
         {/* Mobile Fullscreen Overlay & Menu */}
