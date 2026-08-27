@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Scissors, Menu, X, Phone, Calendar, ChevronRight } from 'lucide-react';
+import { Menu, X, Phone, Calendar, ChevronRight } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,18 +48,22 @@ export default function Navbar() {
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 font-sans ${
           scrolled 
-            ? 'bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm py-3.5' 
-            : 'bg-gradient-to-b from-white/90 via-white/40 to-transparent py-5'
+            ? 'bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm py-2.5' 
+            : 'bg-gradient-to-b from-white/90 via-white/40 to-transparent py-4'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between">
           
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 group z-50">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center transition-transform group-hover:scale-105 shadow-md">
-              <Scissors className="w-5 h-5 text-red-500 transform -rotate-45" />
+            <div className="relative flex items-center justify-center p-1.5 rounded-2xl bg-white/60 backdrop-blur-sm border border-slate-200/60 shadow-sm transition-all group-hover:scale-105 group-hover:shadow-md">
+              <img 
+                src={logo} 
+                alt="Modern Trend Hair Styling" 
+                className="h-9 sm:h-11 w-auto object-contain filter drop-shadow-sm" 
+              />
             </div>
-            <span className="font-modern-title font-extrabold text-xl md:text-2xl tracking-tight text-slate-900">
+            <span className="font-modern-title font-extrabold text-lg sm:text-xl md:text-2xl tracking-tight text-slate-900">
               Modern <span className="text-red-600">Trend</span>
             </span>
           </Link>
@@ -84,14 +89,14 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-4">
             <a 
               href="tel:+15064728199" 
-              className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors px-3 py-2"
+              className="flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-blue-700 transition-colors px-3 py-2 min-h-[44px]"
             >
               <Phone className="w-4 h-4 text-blue-700" />
               (506) 472-8199
             </a>
             <Link
               to="/booking"
-              className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2 min-h-[44px]"
             >
               <Calendar className="w-4 h-4" />
               Book Now
@@ -101,7 +106,7 @@ export default function Navbar() {
           {/* Mobile Toggle Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden z-50 p-2.5 rounded-xl bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 shadow-sm hover:bg-slate-50 active:scale-95 transition-all"
+            className="md:hidden z-50 p-2.5 rounded-xl bg-white/90 backdrop-blur-md border border-slate-200 text-slate-900 shadow-sm hover:bg-slate-50 active:scale-95 transition-all min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Toggle Menu"
           >
             {isOpen ? <X className="w-6 h-6 text-red-600" /> : <Menu className="w-6 h-6" />}
@@ -110,10 +115,10 @@ export default function Navbar() {
 
         {/* Mobile Fullscreen Overlay & Menu */}
         {isOpen && (
-          <div className="md:hidden fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-md pt-24 px-6 pb-8 flex flex-col justify-between animate-in fade-in duration-200">
+          <div className="md:hidden fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-md pt-24 px-4 sm:px-6 pb-8 flex flex-col justify-between animate-in fade-in duration-200">
             
             {/* Nav Card */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xl space-y-3">
+            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-2xl space-y-3">
               <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 block px-2 mb-1">Navigation</span>
               <nav className="flex flex-col gap-1.5">
                 {navLinks.map((link) => (
@@ -121,7 +126,7 @@ export default function Navbar() {
                     key={link.name}
                     to={link.path}
                     onClick={toggleMenu}
-                    className={`flex items-center justify-between p-3.5 rounded-2xl text-sm font-bold tracking-wider uppercase transition-all ${
+                    className={`flex items-center justify-between p-3.5 rounded-2xl text-xs sm:text-sm font-bold tracking-wider uppercase transition-all min-h-[44px] ${
                       isActive(link.path)
                         ? 'bg-slate-900 text-white shadow-md'
                         : 'text-slate-800 hover:bg-slate-100'
@@ -137,7 +142,7 @@ export default function Navbar() {
                 <Link
                   to="/booking"
                   onClick={toggleMenu}
-                  className="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider py-4 rounded-2xl text-center shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-all"
+                  className="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider py-3.5 sm:py-4 rounded-2xl text-center shadow-lg flex items-center justify-center gap-2 active:scale-98 transition-all min-h-[44px]"
                 >
                   <Calendar className="w-4 h-4" /> Book Appointment
                 </Link>
