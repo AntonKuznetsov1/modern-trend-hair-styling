@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  FileText, Clock, ShieldAlert, RefreshCw, Upload, Image as ImageIcon, 
-  Trash2, Plus, CalendarX, PlusCircle, Ban, Lock, LogOut, Menu, X, Send 
+  FileText, RefreshCw, Upload, Image as ImageIcon, 
+  Trash2, Lock, LogOut, Send 
 } from 'lucide-react';
 import axios from 'axios';
 import { supabase } from '../lib/supabaseClient';
@@ -12,8 +12,6 @@ export default function Admin() {
   const [authError, setAuthError] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
 
-  const [activeTab, setActiveTab] = useState('blog');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,21 +21,6 @@ export default function Admin() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [publishing, setPublishing] = useState(false);
-
-  // Availability State
-  const [settings, setSettings] = useState({
-    default_slots: [],
-    blocked_dates: [],
-    blocked_times: [],
-    custom_slots: []
-  });
-
-  const [newDefaultTime, setNewDefaultTime] = useState('');
-  const [blockDateInput, setBlockDateInput] = useState('');
-  const [blockTimeDate, setBlockTimeDate] = useState('');
-  const [blockTimeSlot, setBlockTimeSlot] = useState('');
-  const [customSlotDate, setCustomSlotDate] = useState('');
-  const [customSlotTime, setCustomSlotTime] = useState('');
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://modern-trend-hair-styling.onrender.com';
 
@@ -74,12 +57,8 @@ export default function Admin() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [blogsRes, settingsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/blogs`),
-        axios.get(`${API_URL}/api/availability/settings`)
-      ]);
+      const blogsRes = await axios.get(`${API_URL}/api/blogs`);
       setBlogs(blogsRes.data);
-      setSettings(settingsRes.data);
     } catch (err) {
       console.error("Failed to fetch admin data:", err);
     } finally {
@@ -159,74 +138,6 @@ export default function Admin() {
     }
   };
 
-  const handleAddDefaultSlot = async (e) => {
-    e.preventDefault();
-    if (!newDefaultTime) return;
-    try {
-      const res = await axios.post(`${API_URL}/api/availability/default-slots`, { time: newDefaultTime });
-      setSettings(prev => ({ ...prev, default_slots: [...prev.default_slots, res.data] }));
-      setNewDefaultTime('');
-    } catch (err) { console.error(err); }
-  };
-
-  const handleDeleteDefaultSlot = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/api/availability/default-slots/${id}`);
-      setSettings(prev => ({ ...prev, default_slots: prev.default_slots.filter(s => s.id !== id) }));
-    } catch (err) { console.error(err); }
-  };
-
-  const handleBlockDate = async (e) => {
-    e.preventDefault();
-    if (!blockDateInput) return;
-    try {
-      const res = await axios.post(`${API_URL}/api/availability/block-date`, { date: blockDateInput });
-      setSettings(prev => ({ ...prev, blocked_dates: [...prev.blocked_dates, res.data] }));
-      setBlockDateInput('');
-    } catch (err) { console.error(err); }
-  };
-
-  const handleUnblockDate = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/api/availability/block-date/${id}`);
-      setSettings(prev => ({ ...prev, blocked_dates: prev.blocked_dates.filter(b => b.id !== id) }));
-    } catch (err) { console.error(err); }
-  };
-
-  const handleBlockTime = async (e) => {
-    e.preventDefault();
-    if (!blockTimeDate || !blockTimeSlot) return;
-    try {
-      const res = await axios.post(`${API_URL}/api/availability/block-time`, { date: blockTimeDate, time: blockTimeSlot });
-      setSettings(prev => ({ ...prev, blocked_times: [...prev.blocked_times, res.data] }));
-      setBlockTimeDate(''); setBlockTimeSlot('');
-    } catch (err) { console.error(err); }
-  };
-
-  const handleUnblockTime = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/api/availability/block-time/${id}`);
-      setSettings(prev => ({ ...prev, blocked_times: prev.blocked_times.filter(b => b.id !== id) }));
-    } catch (err) { console.error(err); }
-  };
-
-  const handleAddCustomSlot = async (e) => {
-    e.preventDefault();
-    if (!customSlotDate || !customSlotTime) return;
-    try {
-      const res = await axios.post(`${API_URL}/api/availability/custom-slot`, { date: customSlotDate, time: customSlotTime });
-      setSettings(prev => ({ ...prev, custom_slots: [...prev.custom_slots, res.data] }));
-      setCustomSlotDate(''); setCustomSlotTime('');
-    } catch (err) { console.error(err); }
-  };
-
-  const handleDeleteCustomSlot = async (id) => {
-    try {
-      await axios.delete(`${API_URL}/api/availability/custom-slot/${id}`);
-      setSettings(prev => ({ ...prev, custom_slots: prev.custom_slots.filter(c => c.id !== id) }));
-    } catch (err) { console.error(err); }
-  };
-
   // --- LOGIN SCREEN ---
   if (!isAuthenticated) {
     return (
@@ -281,7 +192,7 @@ export default function Admin() {
 
   // --- ADMIN DASHBOARD ---
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 selection:bg-blue-700 selection:text-white">
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
@@ -289,112 +200,42 @@ export default function Admin() {
         `}
       </style>
 
-      {/* Mobile Top Navigation Header */}
-      <div className="md:hidden flex items-center justify-between bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-            className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-md font-bold text-xs">
+      {/* Top Header Navigation Bar */}
+      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-lg font-bold text-lg text-white">
               MT
             </div>
-            <span className="font-modern-title font-bold text-slate-100 text-sm tracking-tight">Modern Trend</span>
-          </div>
-        </div>
-
-        <button 
-          onClick={fetchData} 
-          title="Refresh Data" 
-          className="p-2.5 text-slate-400 hover:text-white transition-colors rounded-xl bg-slate-950 border border-slate-800"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-400' : ''}`} />
-        </button>
-      </div>
-
-      {/* Mobile Backdrop Drawer Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Sidebar Drawer */}
-      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-6 transform transition-transform duration-300 ease-in-out ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-      }`}>
-        <div>
-          <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-800">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-blue-700 flex items-center justify-center shadow-lg font-bold text-lg">
-                MT
-              </div>
-              <div>
-                <h2 className="font-modern-title font-bold text-slate-100 tracking-tight leading-tight">Modern Trend</h2>
-                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Admin Console</p>
-              </div>
+            <div>
+              <h2 className="font-modern-title font-bold text-slate-100 tracking-tight leading-tight text-base sm:text-lg">Modern Trend</h2>
+              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">Admin Dashboard</p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
             <button 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden text-slate-400 hover:text-white p-1"
+              onClick={fetchData} 
+              title="Refresh Data" 
+              className="p-2.5 text-slate-400 hover:text-white transition-colors rounded-xl bg-slate-950 border border-slate-800"
             >
-              <X className="w-5 h-5" />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-blue-400' : ''}`} />
             </button>
-          </div>
-
-          <nav className="space-y-2">
-            {[
-              { id: 'blog', label: 'Blog Manager', icon: FileText },
-              { id: 'schedule', label: 'Availability', icon: Clock }
-            ].map(item => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button 
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setIsMobileMenuOpen(false);
-                  }} 
-                  className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${
-                    isActive ? 'bg-blue-700 text-white shadow-lg shadow-blue-700/30' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        <div className="space-y-4 pt-6 md:pt-0">
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-red-400 py-3 rounded-xl text-xs font-bold transition-colors min-h-[44px]"
-          >
-            <LogOut className="w-4 h-4" /> Exit Session
-          </button>
-
-          <div className="pt-4 border-t border-slate-800 text-xs text-slate-500 font-medium flex items-center justify-between">
-            <span>System Operational</span>
-            <button onClick={fetchData} title="Refresh Data" className="hover:text-white transition-colors p-1">
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-400' : ''}`} />
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-red-400 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors min-h-[40px]"
+            >
+              <LogOut className="w-4 h-4" /> <span className="hidden sm:inline">Exit Session</span>
             </button>
           </div>
         </div>
-      </aside>
+      </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-4 sm:p-6 md:p-12 overflow-y-auto bg-slate-950 w-full max-w-7xl mx-auto">
+      <main className="p-4 sm:p-6 md:p-12 overflow-y-auto bg-slate-950 w-full max-w-7xl mx-auto">
         
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        {/* Metric Header */}
+        <div className="mb-8 sm:mb-10 max-w-4xl">
           <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Published Posts</p>
@@ -402,226 +243,70 @@ export default function Admin() {
             </div>
             <div className="p-3 bg-red-600/10 text-red-400 rounded-xl"><FileText className="w-5 h-5 sm:w-6 sm:h-6" /></div>
           </div>
-
-          <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase font-bold tracking-wider text-slate-500">Default Slots</p>
-              <p className="text-2xl sm:text-3xl font-bold font-modern-title mt-1 text-emerald-400">{settings.default_slots.length}</p>
-            </div>
-            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><Clock className="w-5 h-5 sm:w-6 sm:h-6" /></div>
-          </div>
         </div>
 
-        {/* TAB 1: BLOG MANAGER */}
-        {activeTab === 'blog' && (
-          <div className="space-y-8 sm:space-y-10 max-w-4xl">
-            <div>
-              <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Create New Article</h2>
-              
-              <form onSubmit={handlePublishBlog} className="bg-slate-900 p-4 sm:p-8 rounded-2xl border border-slate-800 space-y-5 sm:space-y-6">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
-                  <input type="text" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="e.g. Master Beard Styling" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium text-sm" />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cover Image</label>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                    <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-slate-300 min-h-[44px]">
-                      <Upload className="w-4 h-4 text-blue-400" /> Choose File
-                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                    </label>
-                    <span className="text-xs text-slate-500 truncate">{imageFile ? imageFile.name : 'No image selected'}</span>
-                  </div>
-                  {imagePreview && (
-                    <div className="mt-4 relative w-full h-40 sm:h-48 rounded-xl overflow-hidden border border-slate-800">
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
-                  <textarea rows="6" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Write your editorial content here..." className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium text-sm resize-none"></textarea>
-                </div>
-
-                <button type="submit" disabled={publishing} className="w-full sm:w-auto bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 sm:py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 text-sm min-h-[44px]">
-                  <Send className="w-4 h-4" /> {publishing ? 'Publishing...' : 'Publish Insight'}
-                </button>
-              </form>
-            </div>
-
-            <div>
-              <h3 className="font-modern-title text-lg sm:text-xl font-bold text-white mb-4">Published Articles ({blogs.length})</h3>
-              <div className="space-y-3 sm:space-y-4">
-                {blogs.map(blog => (
-                  <div key={blog.id} className="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 sm:gap-4">
-                    <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-                      {blog.image_url ? (
-                        <img src={blog.image_url} alt={blog.title} className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-slate-800 flex-shrink-0" />
-                      ) : (
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 flex-shrink-0"><ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" /></div>
-                      )}
-                      <div className="overflow-hidden">
-                        <h4 className="font-bold text-white text-sm sm:text-base truncate">{blog.title}</h4>
-                        <p className="text-xs text-slate-400 line-clamp-1">{blog.content}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => handleDeleteBlog(blog.id)} className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+        {/* BLOG MANAGER SECTION */}
+        <div className="space-y-8 sm:space-y-10 max-w-4xl">
+          <div>
+            <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Create New Article</h2>
+            
+            <form onSubmit={handlePublishBlog} className="bg-slate-900 p-4 sm:p-8 rounded-2xl border border-slate-800 space-y-5 sm:space-y-6">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Title</label>
+                <input type="text" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} placeholder="e.g. Master Beard Styling" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium text-sm" />
               </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cover Image</label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <label className="cursor-pointer bg-slate-950 border border-slate-800 hover:border-slate-700 px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-slate-300 min-h-[44px]">
+                    <Upload className="w-4 h-4 text-blue-400" /> Choose File
+                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  </label>
+                  <span className="text-xs text-slate-500 truncate">{imageFile ? imageFile.name : 'No image selected'}</span>
+                </div>
+                {imagePreview && (
+                  <div className="mt-4 relative w-full h-40 sm:h-48 rounded-xl overflow-hidden border border-slate-800">
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Article Content</label>
+                <textarea rows="6" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} placeholder="Write your editorial content here..." className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 sm:p-4 text-white placeholder-slate-600 focus:outline-none focus:border-blue-700 font-medium text-sm resize-none"></textarea>
+              </div>
+
+              <button type="submit" disabled={publishing} className="w-full sm:w-auto bg-blue-700 hover:bg-blue-600 text-white font-bold py-3.5 sm:py-4 px-8 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 text-sm min-h-[44px]">
+                <Send className="w-4 h-4" /> {publishing ? 'Publishing...' : 'Publish Insight'}
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <h3 className="font-modern-title text-lg sm:text-xl font-bold text-white mb-4">Published Articles ({blogs.length})</h3>
+            <div className="space-y-3 sm:space-y-4">
+              {blogs.map(blog => (
+                <div key={blog.id} className="bg-slate-900 border border-slate-800 p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                    {blog.image_url ? (
+                      <img src={blog.image_url} alt={blog.title} className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-slate-800 flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 flex-shrink-0"><ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" /></div>
+                    )}
+                    <div className="overflow-hidden">
+                      <h4 className="font-bold text-white text-sm sm:text-base truncate">{blog.title}</h4>
+                      <p className="text-xs text-slate-400 line-clamp-1">{blog.content}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => handleDeleteBlog(blog.id)} className="p-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-xl border border-red-500/20 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-        )}
-
-        {/* TAB 2: AVAILABILITY SETTINGS */}
-        {activeTab === 'schedule' && (
-          <div className="space-y-6 sm:space-y-8 max-w-4xl">
-            <div>
-              <h2 className="font-modern-title text-2xl sm:text-3xl font-bold text-white mb-2">Schedule & Availability Controls</h2>
-              <p className="text-slate-400 text-xs sm:text-sm">Configure standard daily hours, ban entire days or specific times, and create custom single-day slots.</p>
-            </div>
-
-            {/* SECTION 1: DEFAULT SLOTS */}
-            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
-              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
-                <Clock className="w-5 h-5 text-blue-400" /> Default Recurring Slots
-              </h3>
-              
-              <form onSubmit={handleAddDefaultSlot} className="flex flex-col sm:flex-row gap-3">
-                <input 
-                  type="text" 
-                  placeholder="e.g. 09:00 AM, 02:30 PM" 
-                  value={newDefaultTime} 
-                  onChange={e => setNewDefaultTime(e.target.value)} 
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-blue-700 text-sm" 
-                />
-                <button type="submit" className="bg-blue-700 hover:bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
-                  <Plus className="w-4 h-4" /> Add Default
-                </button>
-              </form>
-
-              <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                {settings.default_slots.map(s => (
-                  <div key={s.id} className="bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-slate-200">
-                    <span>{s.time}</span>
-                    <button onClick={() => handleDeleteDefaultSlot(s.id)} className="text-slate-500 hover:text-red-400 transition-colors p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* SECTION 2: BLOCK ENTIRE DATE */}
-            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
-              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
-                <CalendarX className="w-5 h-5 text-red-400" /> Block Entire Days (Holidays / Days Off)
-              </h3>
-
-              <form onSubmit={handleBlockDate} className="flex flex-col sm:flex-row gap-3">
-                <input 
-                  type="date" 
-                  value={blockDateInput} 
-                  onChange={e => setBlockDateInput(e.target.value)} 
-                  className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-red-600 text-sm" 
-                />
-                <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
-                  <ShieldAlert className="w-4 h-4" /> Ban Date
-                </button>
-              </form>
-
-              <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                {settings.blocked_dates.map(b => (
-                  <div key={b.id} className="bg-red-950/40 border border-red-800/50 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-red-200">
-                    <span>{b.date}</span>
-                    <button onClick={() => handleUnblockDate(b.id)} className="text-red-400 hover:text-white transition-colors p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* SECTION 3: BLOCK SPECIFIC TIME ON SPECIFIC DAY */}
-            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
-              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
-                <Ban className="w-5 h-5 text-amber-400" /> Ban Specific Time Slot on Specific Day
-              </h3>
-
-              <form onSubmit={handleBlockTime} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input 
-                  type="date" 
-                  value={blockTimeDate} 
-                  onChange={e => setBlockTimeDate(e.target.value)} 
-                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-amber-500 text-sm" 
-                />
-                <input 
-                  type="text" 
-                  placeholder="e.g. 01:00 PM" 
-                  value={blockTimeSlot} 
-                  onChange={e => setBlockTimeSlot(e.target.value)} 
-                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-amber-500 text-sm" 
-                />
-                <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
-                  <Ban className="w-4 h-4" /> Block Slot
-                </button>
-              </form>
-
-              <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                {settings.blocked_times.map(bt => (
-                  <div key={bt.id} className="bg-amber-950/30 border border-amber-800/40 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-amber-200">
-                    <span>{bt.date} @ {bt.time}</span>
-                    <button onClick={() => handleUnblockTime(bt.id)} className="text-amber-400 hover:text-white transition-colors p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* SECTION 4: SINGLE-DAY CUSTOM EXTRA SLOTS */}
-            <div className="bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-800 space-y-4 sm:space-y-6">
-              <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
-                <PlusCircle className="w-5 h-5 text-emerald-400" /> Add Custom Slot for Single Day Only
-              </h3>
-
-              <form onSubmit={handleAddCustomSlot} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <input 
-                  type="date" 
-                  value={customSlotDate} 
-                  onChange={e => setCustomSlotDate(e.target.value)} 
-                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-emerald-500 text-sm" 
-                />
-                <input 
-                  type="text" 
-                  placeholder="e.g. 06:30 PM" 
-                  value={customSlotTime} 
-                  onChange={e => setCustomSlotTime(e.target.value)} 
-                  className="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white focus:outline-none focus:border-emerald-500 text-sm" 
-                />
-                <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]">
-                  <PlusCircle className="w-4 h-4" /> Add Custom
-                </button>
-              </form>
-
-              <div className="flex flex-wrap gap-2.5 sm:gap-3">
-                {settings.custom_slots.map(cs => (
-                  <div key={cs.id} className="bg-emerald-950/30 border border-emerald-800/40 px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs sm:text-sm font-semibold text-emerald-200">
-                    <span>{cs.date} @ {cs.time}</span>
-                    <button onClick={() => handleDeleteCustomSlot(cs.id)} className="text-emerald-400 hover:text-white transition-colors p-1">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        )}
+        </div>
       </main>
     </div>
   );
