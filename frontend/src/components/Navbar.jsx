@@ -87,14 +87,15 @@ export default function Navbar() {
 
         {/* Action Callouts & Mobile Toggle */}
         <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-4">
-            <a 
+          {/* Changed 'hidden lg:flex' -> 'hidden md:flex' and '<a>' -> '<Link>' */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link 
               to="/blog" 
               className="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold uppercase tracking-wider px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2 min-h-[44px] whitespace-nowrap"
             >
-              <Schedule className="w-4 h-4" />
+              <FileText className="w-4 h-4" />
               Check our Blog
-            </a>
+            </Link>
           </div>
 
           <button
